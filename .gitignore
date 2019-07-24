@@ -2,3 +2,7 @@
 venv/
 #忽略pycharm自带的文件夹
 .idea/
+
+#忽略缓存
+__pycache__/
+app/__pycache__/
