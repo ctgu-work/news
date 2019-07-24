@@ -30,6 +30,6 @@ class TestingConfig(BaseConfig):
 
 config = {
     "development": DevelopmentConfig,
-    "producction": ProductionConfig,
+    "production": ProductionConfig,
     "testing": TestingConfig
 }
