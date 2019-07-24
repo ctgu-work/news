@@ -13,13 +13,11 @@ def create_app():
     # 注册蓝图
 
     # 初始化mysql
-    # db = SQLAlchemy(app)
 
     return app
 
 
 # 创建flask应用程序
-app = create_app()
-
-
+# app = create_app()
+# db = SQLAlchemy(app)
 
