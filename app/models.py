@@ -198,5 +198,5 @@ class Category(BaseModel, db.Model):
 
 
 # 创建数据表
-if __name__ == "__main__":
-    db.create_all()
+# if __name__ == "__main__":
+#     db.create_all()

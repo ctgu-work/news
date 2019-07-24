@@ -18,6 +18,6 @@ def create_app():
 
 
 # 创建flask应用程序
-# app = create_app()
-# db = SQLAlchemy(app)
+app = create_app()
+db = SQLAlchemy(app)
 
