@@ -136,9 +136,24 @@ def userRegister():
 
 
 # 登录
-@home_index.route('/login')
+@home_index.route('/login',methods=['POST'])
 def userLogin():
-    return ""
+    from app.models import User
+    mobile = request.json.get("mobile")
+    password = request.json.get("password")
+    if not all([mobile, password]):
+        return jsonify(errno=RET.PARAMERR, errmsg=error_map[RET.PARAMERR])
+    if not re.match(r"1[356789]\d{9}$", mobile):
+        return jsonify(errno=RET.PARAMERR, errmsg=error_map[RET.PARAMERR])
+    user = User.query.filter_by(mobile=mobile).first()
+    # 不存在用户
+    if not user:
+        return jsonify(errno=RET.USERERR, errmsg=error_map[RET.USERERR])
+    if not user.check_password(password):
+        return jsonify(errno=RET.PARAMERR, errmsg="用户名或者密码错误")
+    user.last_login = datetime.now()
+    session["user_id"] = user.id
+    return jsonify(errno=RET.OK, errmsg=error_map[RET.OK])
 
 
 # 退出登录
