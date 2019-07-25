@@ -35,7 +35,7 @@ $(function(){
 	// 点击输入框，提示文字上移
 	$('.form_group').on('click focusin',function(){
 		$(this).children('.input_tip').animate({'top':-5,'font-size':12},'fast').siblings('input').focus().parent().addClass('hotline');
-	})
+	});
 
 	// 输入框失去焦点，如果输入框为空，则提示文字下移
 	$('.form_group input').on('blur focusout',function(){
@@ -45,14 +45,14 @@ $(function(){
 		{
 			$(this).siblings('.input_tip').animate({'top':22,'font-size':14},'fast');
 		}
-	})
+	});
 
 
 	// 打开注册框
 	$('.register_btn').click(function(){
 		$('.register_form_con').show();
-		generateImageCode()
-	})
+        generateImageCode();
+	});
 
 
 	// 登录框和注册框切换
@@ -122,37 +122,81 @@ $(function(){
         var mobile = $("#register_mobile").val()
         var smscode = $("#smscode").val()
         var password = $("#register_password").val()
-
+        var imagecode = $("#imagecode").val();
+        if (!imagecode) {
+            $("#register-image-code-err").show();
+        }
+	    else{
+	        $("#register-image-code-err").hide();
+        }
 		if (!mobile) {
             $("#register-mobile-err").show();
-            return;
+        }
+	    else{
+	        $("#register-mobile-err").hide();
         }
         if (!smscode) {
             $("#register-sms-code-err").show();
-            return;
+        }
+        else {
+            $("#register-sms-code-err").hide();
         }
         if (!password) {
             $("#register-password-err").html("请填写密码!");
             $("#register-password-err").show();
-            return;
+        }
+        else{
+            $("#register-password-err").html("");
+            $("#register-password-err").hide();
         }
 
 		if (password.length < 6) {
             $("#register-password-err").html("密码长度不能少于6位");
             $("#register-password-err").show();
-            return;
+        }
+		else{
+		    $("#register-password-err").html("");
+            $("#register-password-err").hide();
         }
 
         // 发起注册请求
+        var data = {
+            "mobile": mobile,
+            "smscode": smscode,
+            "password": password,
+            "imagecode":imagecode
+        };
+
+        // $ .ajax({
+        //     url: "/index/register",
+        //     type: "post",
+        //     contentType: "application/json",
+        //     data: JSON.stringify(data),
+        //     success: function (resp) {
+        //         if (resp.errno == "0") {
+        //             $("#register-password-err").html("")
+        //             $("#register-password-err").hide()
+        //             location.reload()
+        //         } else {
+        //             // 代表注册失败
+        //             alert(resp.errmsg)
+        //             $("#register-password-err").html(resp.errmsg)
+        //             $("#register-password-err").show()
+        //         }
+        //     }
+        // })
 
     })
-})
+});
 
 var imageCodeId = ""
 
 // TODO 生成一个图片验证码的编号，并设置页面中图片验证码img标签的src属性
 function generateImageCode() {
-
+    imageCodeId = generateUUID();
+    url = "/index/get_image_code?img_code_id=" + imageCodeId;
+    // 设置对应的src属性为该url
+    $(".get_pic_code").attr("src", url);
 }
 
 // 发送短信验证码
@@ -210,4 +254,16 @@ function generateUUID() {
         return (c=='x' ? r : (r&0x3|0x8)).toString(16);
     });
     return uuid;
+}
+
+// 用户退出登录
+function logout() {
+    $.get('/index/logout', function (resp) {
+        if (resp.errno == "0") {
+            location.reload();
+        }
+        else {
+            alert(resp.errmsg);
+        }
+    })
 }

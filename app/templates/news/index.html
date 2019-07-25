@@ -12,10 +12,10 @@
 {% block category_block %}
     <ul class="menu fl">
         {% for category in categories %}
-            <li {% if loop.index == 1 %}class="active"{% endif %} data-cid="{{ category.id }}"><a
-                    href="javascript:;">{{ category.name }}</a></li>
+            <li {% if loop.index == 1 %}class="active"{% endif %} data-cid="{{ category.id }}">
+                <a href="javascript:;">{{ category.name }}</a>
+            </li>
         {% endfor %}
-
     </ul>
 {% endblock %}
 

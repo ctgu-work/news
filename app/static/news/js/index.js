@@ -56,7 +56,7 @@ function updateNewsData() {
         "cur_page": cur_page
     };
     $.get("/index/get_news_list", params, function (resp) {
-        // 数据加载完毕，设置【正在加载数据】的变量为 false 代表当前没有在加载数据
+        // 数据加载完毕，设置data_querying的变量为 false 代表当前没有在加载数据
         data_querying = false
         if (resp.errno == "0") {
             // 给总页数据赋值
@@ -71,7 +71,7 @@ function updateNewsData() {
             for (var i=0;i<resp.data.news_list.length;i++) {
                 var news = resp.data.news_list[i];
                 var content = '<li>';
-                content += '<a href="/news/' + news.id + '" class="news_pic fl"><img src="' + news.index_image_url + '?imageView2/1/w/170/h/170"></a>';
+                content += '<a href="/news/' + news.id + '" class="news_pic fl"><img src="' + news.index_image_url + '"></a>';
                 content += '<a href="/news/' + news.id + '" class="news_title fl">' + news.title + '</a>';
                 content += '<a href="/news/' + news.id + '" class="news_detail fl">' + news.digest + '</a>';
                 content += '<div class="author_info fl">';
@@ -81,7 +81,8 @@ function updateNewsData() {
                 content += '</li>';
                 $(".list_con").append(content);
             }
-        }else {
+        }
+        else {
             // 请求失败
             alert(resp.errmsg)
         }

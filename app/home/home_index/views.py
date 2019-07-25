@@ -1,7 +1,8 @@
 from . import home_index
-from flask import current_app, render_template, session, request, jsonify
+from flask import current_app, render_template, session, request,make_response, jsonify
 from app.constants import CLICK_RANK_MAX_NEWS, HOME_PAGE_MAX_NEWS
 from app.utils.response_code import RET, error_map
+from app.utils.captcha.captcha import captcha
 
 
 # 跳转首页
@@ -64,4 +65,36 @@ def get_news_list():
     return jsonify(errno=RET.OK, errmsg=error_map[RET.OK], data=data)
 
 
+# 刷新图片验证码
+@home_index.route('/get_image_code')
+def getImageCode():
+    img_code_id = request.args.get("img_code_id")
+    # 打印发现该方法返回对象包括随机名字 , 验证码内容 , 和图片数据
+    img_name , img_content , img_data = captcha.generate_captcha()
+    response = make_response(img_data)
+    response.content_type = "image/jpeg"
+    # 将验证码存入session
+    session['imgContent'] = img_content
+    # 返回验证码图片
+    return response
+
+# 获取短信验证
+
+
 # 登录
+@home_index.route('/login')
+def userLogin():
+    return ""
+
+# 注册
+@home_index.route('/register')
+def userRegister():
+    return ""
+
+# 退出登录
+@home_index.route('/logout')
+def logout():
+    # 删除session中的user_id
+    session.pop("user_id", None)
+    # 将结果以json返回
+    return jsonify(errno=RET.OK, errmsg=error_map[RET.OK])
