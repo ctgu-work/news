@@ -1,8 +1,12 @@
 from . import home_index
-from flask import current_app, render_template, session, request,make_response, jsonify
+from flask import render_template, session, request,make_response, jsonify
 from app.constants import CLICK_RANK_MAX_NEWS, HOME_PAGE_MAX_NEWS
 from app.utils.response_code import RET, error_map
 from app.utils.captcha.captcha import captcha
+from app.lib.yuntongxun.sms import CCP
+from datetime import datetime
+# 引入正则表达验证 , 随机数
+import re , random
 
 
 # 跳转首页
@@ -42,7 +46,6 @@ def get_news_list():
         cur_page = int(cur_page)
         per_count = int(per_count)
     except BaseException as e:
-        current_app.logger.error(e)
         return jsonify(errno=RET.PARAMERR, errmsg=error_map[RET.PARAMERR])
 
     # 新闻的状态需要是 0 ，这样才是审核通过
@@ -51,11 +54,10 @@ def get_news_list():
     if cid != 1:
         filter_list.append(News.category_id == cid)
     try:
-        # python内置过滤函数
+        # filter是python内置过滤函数
         # paginate是分页函数
         everypage = News.query.filter(*filter_list).order_by(News.create_time.desc()).paginate(cur_page, per_count)
     except BaseException as e:
-        current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg=error_map[RET.DBERR])
     data = {
         "news_list": [news.to_basic_dict() for news in everypage.items],
@@ -74,11 +76,63 @@ def getImageCode():
     response = make_response(img_data)
     response.content_type = "image/jpeg"
     # 将验证码存入session
-    session['imgContent'] = img_content
+    session[img_code_id] = img_content
     # 返回验证码图片
     return response
 
-# 获取短信验证
+
+# 获取短信验证码
+@home_index.route('/get_sms_code',methods=['POST'])
+def getSmsCode():
+    from app.models import User
+    mobile = request.json.get("mobile")
+    img_code = request.json.get("image_code")
+    img_code_id = request.json.get("image_code_id")
+    # 校验参数
+    if not all([mobile, img_code, img_code_id]):
+        # 返回参数错误
+        return jsonify(errno=RET.PARAMERR, errmsg=error_map[RET.PARAMERR])
+    if not re.match(r"1[356789]\d{9}$", mobile):
+        # 返回参数错误
+        return jsonify(errno=RET.PARAMERR, errmsg=error_map[RET.PARAMERR])
+    real_img_code = session.get(img_code_id)
+    print(real_img_code , img_code)
+    if real_img_code != img_code.upper() :
+        return jsonify(errno=RET.PARAMERR, errmsg=error_map[RET.PARAMERR])
+    user = User.query.filter_by(mobile=mobile).first()
+    if user :
+        return jsonify(errno=RET.DATAEXIST, errmsg=error_map[RET.DATAEXIST])
+    sms_code = random.randint(100000, 999999)
+    response_code = CCP().send_template_sms(mobile, [sms_code], 1)
+    session[mobile] = sms_code
+    return jsonify(errno=RET.OK, errmsg=error_map[RET.OK])
+
+
+# 注册
+@home_index.route('/register',methods=['POST'])
+def userRegister():
+    from app.models import User
+    from app import db
+    mobile = request.json.get("mobile")
+    password = request.json.get("password")
+    sms_code = request.json.get("smsCode")
+    # 校验参数
+    if not all([mobile, password, sms_code]):
+        # 返回参数错误
+        return jsonify(errno=RET.PARAMERR, errmsg=error_map[RET.PARAMERR])
+    real_sms_code = session.get(mobile)
+    print( real_sms_code , sms_code )
+    if str(real_sms_code) != str(sms_code):
+        return jsonify(errno=RET.PARAMERR, errmsg="短信验证码错误")
+    user = User()
+    user.mobile = mobile
+    user.password = password
+    user.nick_name = mobile
+    user.last_login = datetime.now()
+    db.session.add(user)
+    db.session.commit()
+    session["user_id"] = user.id
+    return jsonify(errno=RET.OK, errmsg=error_map[RET.OK])
 
 
 # 登录
@@ -86,10 +140,6 @@ def getImageCode():
 def userLogin():
     return ""
 
-# 注册
-@home_index.route('/register')
-def userRegister():
-    return ""
 
 # 退出登录
 @home_index.route('/logout')
