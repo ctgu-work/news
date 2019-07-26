@@ -4,6 +4,7 @@ from flask import request
 from flask import jsonify
 from flask import
 
+
 @admin_news.route('/index')
 def index():
     return render_template("admin/index.html")
@@ -95,3 +96,4 @@ def review_detail():
 @admin_news.route('/edit_detail')
 def edit_detail():
     return render_template('admin/news_edit_detail.html')
+

@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from config import config
 
+
 from app.home.home_user import home_user
 from app.home.home_news import home_news
 from app.home.home_index import home_index
@@ -29,11 +30,9 @@ def create_app():
     admin.register_blueprint(admin_user, url_prefix="/user")
     admin.register_blueprint(admin_news, url_prefix="/news")
     app.register_blueprint(admin)
-
-
     return app
 
 
-# 创建flask应用程序
 app = create_app()
 db = SQLAlchemy(app)
+
