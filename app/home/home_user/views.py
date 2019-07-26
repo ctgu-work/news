@@ -1,7 +1,9 @@
 from . import home_user
-from flask import render_template
+from flask import render_template, request, redirect
+from .forms import UserBaseForm, ModifyPassowrd
 
 
+# 测试
 @home_user.route('/test1')
 def test1():
     return "user"
@@ -15,9 +17,17 @@ def index():
 
 
 # 基本信息
-@home_user.route('/user_base/')
+@home_user.route('/user_base/', methods=["GET", "POST"])
 def user_base():
-    return render_template("news/user_base_info.html")
+    if request.method == "GET":
+        form = UserBaseForm()
+    else:
+        form = UserBaseForm(formdata=request.form)
+        if form.validate():
+            print("yes")
+        else:
+            print("wrong: ", form.errors)
+    return render_template("news/user_base_info.html", form=form)
 
 
 # 头像设置
@@ -33,9 +43,18 @@ def user_follow():
 
 
 # 修改密码
-@home_user.route('/user_pass_info/')
+@home_user.route('/user_pass_info/', methods=["GET", "POST"])
 def user_pass_info():
-    return render_template('news/user_pass_info.html')
+    if request.method == "GET":
+        form = ModifyPassowrd()
+        print("GET")
+    else:
+        print("POST")
+        form = ModifyPassowrd(formdata=request.form)
+        if form.validate_on_submit():
+            print(form.data)
+        print(form.errors)
+    return render_template('news/user_pass_info.html', form=form)
 
 
 # 我的收藏

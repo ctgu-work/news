@@ -1,0 +1,109 @@
+# coding:utf8
+
+from flask_wtf import FlaskForm
+from wtforms import StringField, RadioField, SubmitField, PasswordField, Form
+from wtforms.validators import DataRequired, ValidationError
+from wtforms import validators, widgets
+
+
+class UserBaseForm(FlaskForm):
+    """用户基本信息表单 """
+    # 个性签名
+    signature = StringField(
+        label="个性签名",
+        validators=[  # 验证器
+            validators.DataRequired(message="用户名不能为空"),
+            validators.Length(max=20, min=3, message="个性签名长度必须小于%(max)d且大于%(min)d")
+
+        ],
+        description="个性签名",
+        render_kw={
+            "class": "input_txt",
+            "required": "required",
+            "placeholder": "请输入个性签名"
+        }
+    )
+
+    # 昵称
+    nickname = StringField(
+        label="昵称",
+        validators=[
+            validators.DataRequired('请输入昵称！'),
+            validators.Length(max=10, min=1, message="昵称长度必须小于%(max)d且大于%(min)d")
+        ],
+        description="昵称",
+        render_kw={
+            "class": "input_txt",
+            "required": "required",
+            "placeholder": "请输入昵称"
+        }
+    )
+
+    # 性别
+    gender = RadioField(
+        label="性别",
+        description="性别",
+        validators=[
+            DataRequired()
+        ],
+        coerce=int,
+        choices=[
+            (1, '男'),  # Male
+            (2, '女')  # FeMale
+        ],
+        default=1,
+        render_kw={
+            "style": "display:inline-flex",
+        }
+
+    )
+    submit = SubmitField(
+        '登录',
+        render_kw={
+            "class": "btn btn-primary btn-block btn-flat"
+        }
+
+    )
+
+
+"""修改密码"""
+
+
+class ModifyPassowrd(FlaskForm):
+    oldPassword = PasswordField(
+        label="当前密码",
+        validators=[  # 验证器
+            validators.DataRequired(message="密码不能为空"),
+            validators.Length(max=20, min=3, message="密码长度必须小于%(max)d且大于%(min)d")
+        ],
+        render_kw={
+            "class": "input_txt"
+        }
+    )
+    newPassword = PasswordField(
+        label="新密码",
+        validators=[  # 验证器
+            validators.DataRequired(message="密码不能为空"),
+            validators.Length(max=20, min=3, message="密码长度必须小于%(max)d且大于%(min)d")
+        ],
+        render_kw={
+            "class": "input_txt"
+        }
+    )
+    confirmPassword = PasswordField(
+        label="重复密码",
+        validators=[  # 验证器
+            validators.DataRequired(message="密码不能为空"),
+            validators.EqualTo('newPassword', message='两次密码不一致')
+        ],
+        render_kw={
+            "class": "input_txt"
+        }
+    )
+
+    submit = SubmitField(
+        '提交',
+        render_kw={
+            "class": "btn btn-primary btn-block btn-flat"
+        }
+    )
