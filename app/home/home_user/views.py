@@ -1,5 +1,5 @@
 from . import home_user
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, session, flash
 from .forms import UserBaseForm, ModifyPassowrd
 
 
@@ -13,21 +13,34 @@ def test1():
 # user的默认界面
 @home_user.route('/')
 def index():
-    return render_template("news/user.html")
+    from app.models import User
+    id = session["user_id"]
+    user = User.query.filter_by(id=id).first()
+    return render_template("news/user.html", user=user)
 
 
 # 基本信息
 @home_user.route('/user_base/', methods=["GET", "POST"])
 def user_base():
+    user = getUser()
+    user_id = user.id
     if request.method == "GET":
         form = UserBaseForm()
     else:
         form = UserBaseForm(formdata=request.form)
-        if form.validate():
-            print("yes")
-        else:
-            print("wrong: ", form.errors)
-    return render_template("news/user_base_info.html", form=form)
+        if form.validate_on_submit():
+            data = form.data
+            user.signature = data["signature"]
+            user.nick_name = data["nick_name"]
+            print(data["gender"])
+            user.gender = data["gender"]
+            print(data["signature"])
+            print(user.signature)
+            from app import db
+            db.session.commit()
+            flash("修改成功！ ", "ok")
+
+    return render_template("news/user_base_info.html", form=form, user=user)
 
 
 # 头像设置
@@ -39,7 +52,7 @@ def user_pic_info():
 # 我的关注
 @home_user.route('/user_follow/')
 def user_follow():
-    return render_template('news/user_follow.html')
+    return render_template('news/user_follow.html', user=getUser())
 
 
 # 修改密码
@@ -73,3 +86,10 @@ def user_news_release():
 @home_user.route('/user_news_list/')
 def user_news_list():
     return render_template('news/user_news_list.html')
+
+
+def getUser():
+    from app.models import User
+    id = session["user_id"]
+    user = User.query.filter_by(id=id).first()
+    return user

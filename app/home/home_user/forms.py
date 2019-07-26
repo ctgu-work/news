@@ -25,7 +25,7 @@ class UserBaseForm(FlaskForm):
     )
 
     # 昵称
-    nickname = StringField(
+    nick_name = StringField(
         label="昵称",
         validators=[
             validators.DataRequired('请输入昵称！'),
@@ -46,12 +46,12 @@ class UserBaseForm(FlaskForm):
         validators=[
             DataRequired()
         ],
-        coerce=int,
+        coerce=str,
         choices=[
-            (1, '男'),  # Male
-            (2, '女')  # FeMale
+            ("MAN", '男'),  # Male
+            ("WOMAN", '女')  # FeMale
         ],
-        default=1,
+        default="MAN",
         render_kw={
             "style": "display:inline-flex",
         }
