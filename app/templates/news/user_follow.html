@@ -3,45 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <title>用户中心</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/reset.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/jquery.pagination.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/main.css') }}">
-    <script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery-1.12.4.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery.pagination.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static',filename='news/js/user_follow.js') }}"></script>
+
 </head>
 <body class="inframe_body">
-<h3 class="common_title">我的关注</h3>
-<ul class="card_list_con">
+{% import "news/user_page.html" as pg %}
+<h3 id="info-success" class="common_title">我的关注</h3>
 
-    {% for v in range(1,5) %}
+<!--成功提示 -->
+
+<!--成功提示 -->
+
+<ul class="card_list_con">
+    {#    {{user_list|length}}#}
+    {% for v in range(0,user_list|length) %}
         <li class="author_card card_list">
             <a href="#" target="_blank" class="author_pic"><img
                     src="{{ url_for('static',filename='news/images/cat.jpg') }}"
                     alt="author_pic"></a>
-            <a href="#" target="_blank" class="author_name">张大山</a>
-            <div class="author_resume">张大山的简介,张大山</div>
-            <div class="writings"><span>总篇数</span><b>23</b></div>
-            <div class="follows"><span>粉丝</span><b>36</b></div>
-            <a href="javascript:;" class="focus fr">关注</a>
-            <a href="javascript:;" class="focused fr"><span class="out">已关注</span><span class="over">取消关注</span></a>
+            <a href="#" target="_blank" class="author_name">{{ user_list[v].nick_name }}</a>
+            <div class="author_resume">{{ user_list[v].signature }}</div>
+            <div class="writings"><span>总篇数</span><b>{{ news_count[v] }}</b></div>
+            <div class="follows"><span>粉丝</span><b>{{ attention_count[v] }}</b></div>
+            <a href="javascript:;" style="display: none;" onclick="attention(this)" class="focus fr">关注</a>
+            <a href="javascript:;" class="focused fr" onclick="unattention(this)">
+                <span class="out">已关注</span>
+                <span class="over">取消关注</span>
+            </a>
         </li>
     {% endfor %}
-
 </ul>
-
-
-<div id="pagination" class="page"></div>
+<!-- 分页按钮-->
+<div class="box-footer clearfix center-block">
+    {{ pg.page(page_data,'/user.user_follow') }}
+</div>
+<script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery-1.12.4.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery.pagination.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static',filename='news/js/user_follow.js') }}"></script>
+<script src="{{ url_for('static',filename='bootstrap/js/bootstrap.min.js') }}"></script>
 <script>
-    $(function () {
-        $("#pagination").pagination({
-            currentPage: 2,
-            totalPage: 3,
-            callback: function (current) {
-                alert('ok!');
+    var $info = '<div class="alert alert-success alert-dismissible">\n' +
+        '        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×\n' +
+        '        </button>\n' +
+        '        <h4><i class="icon fa fa-check"></i> 操作成功</h4>\n' +
+        '\n' +
+        '    </div>';
+    function unattention(e) {
+        console.log("取关...");
+        var parent = $(e).parent();
+        var children = parent.find("a");
+
+        $.ajax({
+            type: "POST",
+            url: "/user/unattention/" + children[1].innerText,
+            success: function (data) {
+                if (data.msg == "true") {
+                    $('#info-success').after($info);
+                } else {
+                    console.log("取关失败...")
+                }
+            },
+            error: function (error) {
+
             }
         });
-    });
+        $(children[2]).css('display', 'inline-block');
+        $(children[3]).css('display', 'none');
+
+    }
+
+    function attention(e) {
+        console.log("关注...");
+        var parent = $(e).parent();
+        var children = parent.find("a");
+
+        $.ajax({
+            type: "POST",
+            url: "/user/attention/" + children[1].innerText,
+            success: function (data) {
+                if (data.msg == "true") {
+                     $('#info-success').after($info);
+                } else {
+                    console.log("关注失败...")
+                }
+            },
+            error: function (error) {
+
+            }
+        });
+
+        $(children[3]).css('display', 'inline-block');
+        $(children[2]).css('display', 'none');
+    }
 </script>
 </body>
 </html>

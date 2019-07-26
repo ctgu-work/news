@@ -1,5 +1,5 @@
 from . import home_user
-from flask import render_template, request, redirect, session, flash
+from flask import render_template, request, redirect, session, flash, jsonify
 from .forms import UserBaseForm, ModifyPassowrd
 
 
@@ -50,9 +50,36 @@ def user_pic_info():
 
 
 # 我的关注
-@home_user.route('/user_follow/')
-def user_follow():
-    return render_template('news/user_follow.html', user=getUser())
+@home_user.route('/user_follow/<int:page>')
+def user_follow(page=None):
+    from app.models import User, News
+    if page is None:
+        page = 1
+    # 获取当前用户
+    user = getUser()
+    # 获取粉丝并按照id升序排列,前者页码，后者每页最大数量
+    # page_data = user.followers.order_by(User.id.asc()).paginate(page=page, per_page=4)
+    # 获取所有关注
+    page_data = user.followed.order_by(User.id.asc()).paginate(page=page, per_page=4)
+
+    # 关注列表
+    user_list = []
+    # 关注用户的发布新闻数量
+    news_count = []
+    # 关注的人的新闻
+    attention_count = []
+    for v in page_data.items:
+        user_list.append(v)
+        # 单个关注人的新闻数量
+        count = News.query.filter(News.user_id == v.id).count()
+        news_count.append(count)
+        # 取出单个关注的人
+        attention = User.query.filter(User.id == v.id).first()
+        # 关注的人的粉丝数量
+        count = attention.followers.count()
+        attention_count.append(count)
+    return render_template('news/user_follow.html', user=getUser(), user_list=user_list, news_count=news_count,
+                           attention_count=attention_count, page_data=page_data)
 
 
 # 修改密码
@@ -93,3 +120,34 @@ def getUser():
     id = session["user_id"]
     user = User.query.filter_by(id=id).first()
     return user
+
+
+@home_user.route('/unattention/<name>', methods=["GET", "POST"])
+def unattention(name):
+    from app.models import User
+    print("取关...")
+    # 取关的人
+    usr = getUser()
+    # 被取关的人
+    user = User.query.filter(User.nick_name == name).first()
+    # print(user.followers)
+    print(usr)
+    print(user)
+    user.followers.remove(usr)
+    from app import db
+    db.session.commit()
+    return jsonify({"msg": "true"})
+
+
+@home_user.route('/attention/<name>', methods=["POST", "GET"])
+def attention(name):
+    from app.models import User
+    print("关注")
+    # 关注的人
+    usr = getUser()
+    # 被关注的人
+    user = User.query.filter(User.nick_name == name).first()
+    user.followers.append(usr)
+    from app import db
+    db.session.commit()
+    return jsonify({"msg": "true"})

@@ -72,11 +72,6 @@
     $().ready(function () {
         var value = $('#gender').attr("value");
         var lis = $('#gender').find("input");
-
-
-        console.dir(lis[0]);
-        console.dir(lis[1]);
-        console.log(value);
         if (value === "WOMAN") {
             lis[1].checked = "checked";
         } else {
