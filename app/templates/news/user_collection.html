@@ -6,23 +6,29 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/reset.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/jquery.pagination.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/main.css') }}">
-    <script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery-1.12.4.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery.pagination.min.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='bootstrap/css/bootstrap.min.css') }}">
 </head>
 <body class="inframe_body">
+{% import "news/user_page.html" as pg %}
 <div class="my_collect">
     <h3>我的收藏</h3>
     <ul class="article_list">
-        <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
-        <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
-        <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
-        <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
-        <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
-        <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>
+
+        {% for v in page_data.items %}
+            <li><a href="#">{{ v.title }}</a><span>{{ v.update_time }}</span></li>
+        {% endfor %}
     </ul>
 
+    <!-- 分页按钮-->
+    <div class="box-footer clearfix center-block">
+        {{ pg.page(page_data,'/user.user_collection') }}
+    </div>
+    <!-- 分页按钮-->
 
-    <div id="pagination" class="page"></div>
+    {#    <div id="pagination" class="page"></div>#}
+    <script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery-1.12.4.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery.pagination.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='bootstrap/js/bootstrap.min.js') }}"></script>
     <script>
         $(function () {
             $("#pagination").pagination({

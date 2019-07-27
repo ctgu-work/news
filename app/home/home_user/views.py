@@ -109,9 +109,18 @@ def user_pass_info():
 
 
 # 我的收藏
-@home_user.route('/user_collection/')
-def user_collection():
-    return render_template('news/user_collection.html')
+@home_user.route('/user_collection/<int:page>')
+def user_collection(page=None):
+    from app.models import News
+    if page is None:
+        page = 1
+    user = getUser()
+    # page_data = user.followed.order_by(User.id.asc()).paginate(page=page, per_page=4)
+    #我收藏的新闻
+    page_data = user.collection_news.order_by(News.id.asc()).paginate(page=page, per_page=6)
+    for v in page_data.items:
+        print(type(v))
+    return render_template('news/user_collection.html', page_data=page_data)
 
 
 # 新闻发布
