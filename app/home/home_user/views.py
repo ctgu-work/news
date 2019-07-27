@@ -1,5 +1,5 @@
 from . import home_user
-from flask import render_template, request, redirect, session, flash, jsonify
+from flask import render_template, request, redirect, session, flash, jsonify, url_for
 from .forms import UserBaseForm, ModifyPassowrd
 
 
@@ -17,6 +17,13 @@ def index():
     id = session["user_id"]
     user = User.query.filter_by(id=id).first()
     return render_template("news/user.html", user=user)
+
+
+@home_user.route('/logout')
+def logout():
+    session.pop("user_id", None)
+    # return render_template("news/index.html")
+    return "该功能尚未协调完成"
 
 
 # 基本信息
@@ -118,6 +125,7 @@ def user_collection(page=None):
     # 我收藏的新闻 一夜最多6项
     page_data = user.collection_news.order_by(News.id.asc()).paginate(page=page, per_page=6)
     return render_template('news/user_collection.html', page_data=page_data)
+
 
 # 新闻发布
 @home_user.route('/user_news_release/')
