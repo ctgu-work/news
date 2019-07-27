@@ -85,14 +85,25 @@ def user_follow(page=None):
 # 修改密码
 @home_user.route('/user_pass_info/', methods=["GET", "POST"])
 def user_pass_info():
+    from app.models import User
     if request.method == "GET":
         form = ModifyPassowrd()
         print("GET")
     else:
+
         print("POST")
         form = ModifyPassowrd(formdata=request.form)
         if form.validate_on_submit():
-            print(form.data)
+            user = getUser()
+            # 验证密码
+            if user.check_password(form.data["oldPassword"]):
+                user.password = form.data["newPassword"]
+                from app import db
+                db.session.commit()
+                flash("提交成功", "ok")
+            else:
+                flash("密码错误", "error")
+
         print(form.errors)
     return render_template('news/user_pass_info.html', form=form)
 

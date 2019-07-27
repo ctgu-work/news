@@ -26,7 +26,6 @@
                 <font style="color: red">{{ err }}</font>
             </div>
         {% endfor %}
-
     </div>
     <div class="alert alert-danger" style="padding: 0px;border: 0px; line-height: 40px;font-size: 20px;" role="alert">
         {% for err in form.confirmPassword.errors %}
@@ -34,9 +33,26 @@
                 <font style="color: red">{{ err }}</font>
             </div>
         {% endfor %}
-
     </div>
 
+    <!--成功提示 -->
+    {% for msg in get_flashed_messages(category_filter=['ok']) %}
+        <div class="alert alert-success alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×
+            </button>
+            <h4><i class="icon fa fa-check"></i>{{ msg }}</h4>
+        </div>
+    {% endfor %}
+    <!--成功提示 -->
+    <!--错误提示 -->
+    {% for msg in get_flashed_messages(category_filter=['error']) %}
+        <div class="alert alert-danger alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×
+            </button>
+            <h4><i class="icon fa fa-check"></i>{{ msg }}</h4>
+        </div>
+    {% endfor %}
+    <!--错误提示 -->
 
     <div class="form-group">
         {{ form.oldPassword.label }}

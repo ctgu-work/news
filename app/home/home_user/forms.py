@@ -74,7 +74,7 @@ class ModifyPassowrd(FlaskForm):
         label="当前密码",
         validators=[  # 验证器
             validators.DataRequired(message="密码不能为空"),
-            validators.Length(max=20, min=3, message="密码长度必须小于%(max)d且大于%(min)d")
+            # validators.Length(max=20, min=3, message="密码长度必须小于%(max)d且大于%(min)d")
         ],
         render_kw={
             "class": "input_txt"
@@ -84,7 +84,7 @@ class ModifyPassowrd(FlaskForm):
         label="新密码",
         validators=[  # 验证器
             validators.DataRequired(message="密码不能为空"),
-            validators.Length(max=20, min=3, message="密码长度必须小于%(max)d且大于%(min)d")
+            validators.Length(max=16, min=8, message="密码长度必须小于%(max)d且大于%(min)d")
         ],
         render_kw={
             "class": "input_txt"
