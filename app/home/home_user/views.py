@@ -115,13 +115,9 @@ def user_collection(page=None):
     if page is None:
         page = 1
     user = getUser()
-    # page_data = user.followed.order_by(User.id.asc()).paginate(page=page, per_page=4)
-    #我收藏的新闻
+    # 我收藏的新闻 一夜最多6项
     page_data = user.collection_news.order_by(News.id.asc()).paginate(page=page, per_page=6)
-    for v in page_data.items:
-        print(type(v))
     return render_template('news/user_collection.html', page_data=page_data)
-
 
 # 新闻发布
 @home_user.route('/user_news_release/')
