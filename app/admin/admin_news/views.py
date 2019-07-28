@@ -3,6 +3,8 @@ from flask import render_template
 from flask import request
 from flask import jsonify
 from app.utils.response_code import RET
+from app.utils.qiniu.image_storage import storage
+from app import constants
 
 @admin_news.route('/index')
 def index():
@@ -151,11 +153,12 @@ def edit():
 
     return render_template('admin/news_edit.html',data=data)
 
-#将edit_detail分为两种请求
+# 将edit_detail分为两种请求
 @admin_news.route('/edit_detail',methods=['GET','POST'])
 def edit_detail():
     from app.models import News
     from app.models import Category
+    # 如果是GET请求
     if request.method == 'GET':
         news_id = request.args.get("news_id")
         if not news_id:
@@ -182,10 +185,36 @@ def edit_detail():
             "category_list":category_list
         }
         return render_template('admin/news_edit_detail.html',data=data)
-    # else:
+    # 如果是POST请求
+    else:
+        news_id = request.form.get("news_id")
+        title = request.form.get("title")
+        digest = request.form.get("digest")
+        content = request.form.get("content")
+        index_image = request.files.get("index_image")
+        category_id = request.form.get("category_id")
 
+        if not all([news_id,title,digest,content,index_image,category_id]):
+            return jsonify(errno=RET.PARAMERR,msg="参数不全")
+        try:
+            news = News.query.get(news_id)
+        except Exception as e:
+            return jsonify(errno=RET.NODATA,msg="新闻不存在")
+        if index_image:
+            try:
+                index_image_name = storage(index_image.read())
+            except Exception as e:
+                return jsonify(errno=RET.THIRDERR,msg="网络异常")
+        if not index_image_name:
+            return jsonify(errno=RET.NODATA,msg="上传图片失败")
+        news.index_image_url = constants.QINIU_DOMIN_PREFIX + index_image_name
+    news.title = title
+    news.digest = digest
+    news.category_id = category_id
+    news.content = content
+    # 2.9: 返回响应
+    return jsonify(errno=RET.OK,msg="操作成功")
 
-    # return render_template('admin/news_edit_detail.html')
 
 @admin_news.route('/type')
 def type():

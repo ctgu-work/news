@@ -4,11 +4,7 @@ class BaseConfig:
     SECRET_KEY = "8A6C0D12FC0C23AE1390F26581CAE57D12B81B4C6C60C3D86D30BD8D77C1D445"
 
     # 数据库配置
-<<<<<<< HEAD
     SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:123456@127.0.0.1:3306/news"
-=======
-    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:chase@127.0.0.1:3306/news"
->>>>>>> master
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # redis配置
