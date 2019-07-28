@@ -10,10 +10,13 @@
 <body>
 <div class="header_con">
     <div class="header">
-        <a href="#" class="logo fl"><img src="{{ url_for('static',filename='news/images/logo.png') }}" alt="logo"></a>
+        <a href="#" class="logo fl">
+            <img src="{{ url_for('static',filename='news/images/logo.png') }}" alt="logo">
+        </a>
         <div class="user_login fr" style="display: block;">
-
-            <img src="{{ url_for('static',filename='news/images/user_pic.png') }}" class="lgin_pic">
+            <img {% if user.avatar_url %}src="{{ user.avatar_url }}" {% else %}
+             src="../../static/news/images/person01.png"{% endif %} class="lgin_pic">
+{#            <img src="{{ url_for('static',filename='news/images/user_pic.png') }}" class="lgin_pic">#}
             <a href="#">{{ user.nick_name }}</a>
             <a href="{{ url_for('/user.logout') }}">退出</a>
         </div>

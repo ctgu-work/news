@@ -1,12 +1,7 @@
 from . import home_user
-from flask import render_template, request, redirect, session, flash, jsonify, url_for
-from .forms import UserBaseForm, ModifyPassowrd
-
-
-# 测试
-@home_user.route('/test1')
-def test1():
-    return "user"
+from flask import render_template, request, redirect, session, flash, jsonify
+from .forms import UserBaseForm, ModifyPassowrd, UserImg
+from app.utils.qiniu.image_storage import storage
 
 
 # /user
@@ -50,9 +45,25 @@ def user_base():
 
 
 # 头像设置
-@home_user.route('/user_pic_info/')
+@home_user.route('/user_pic_info/', methods=["POST", "GET"])
 def user_pic_info():
-    return render_template('news/user_pic_info.html')
+    form = UserImg()
+    print("img")
+    if request.method == "POST":
+        print("POST")
+        if form.validate_on_submit():
+            file = request.files.get('url').read()
+            key = storage(file)
+            print(key)
+            print(type(key))
+            user = getUser()
+            url_str = "http://pv875q204.bkt.clouddn.com/" + key
+            user.avatar_url = url_str
+            from app import db
+            db.session.commit()
+            # flash("修改失败！ ", "error")
+    return render_template('news/user_pic_info.html', form=form, user=getUser())
+
 
 
 # 我的关注
