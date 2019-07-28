@@ -22,8 +22,7 @@ def index():
 @home_user.route('/logout')
 def logout():
     session.pop("user_id", None)
-    # return render_template("news/index.html")
-    return "该功能尚未协调完成"
+    return redirect("/index/")
 
 
 # 基本信息
