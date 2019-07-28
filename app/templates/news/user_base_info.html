@@ -1,32 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>用户中心</title>
-	<link rel="stylesheet" type="text/css" href="../../static/news/css/reset.css">
-	<link rel="stylesheet" type="text/css" href="../../static/news/css/main.css">
-    <script type="text/javascript" src="../../static/news/js/jquery-1.12.4.min.js"></script>
-    <script type="text/javascript" src="../../static/news/js/user_base_info.js"></script>
+    <meta charset="UTF-8">
+    <title>用户中心</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/reset.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='bootstrap/css/bootstrap.min.css') }}">
+
 </head>
 <body class="inframe_body">
-    <form class="base_info">
-        <h3>基本资料</h3>
-        <div class="form-group">
-            <label>个性签名：</label>
-            <input id="signature" type="text" name="signature" class="input_txt" value="{{ data.user.signature }}">
+<form class="" method="POST">
+    <h3>基本资料</h3>
+
+    <!-- 正确提示-->
+    {% for msg in get_flashed_messages(category_filter=['ok']) %}
+        <div class="alert alert-success alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×
+            </button>
+            <h4><i class="icon fa fa-check"></i> {{ msg }}</h4>
         </div>
-        <div class="form-group">
-            <label>用户昵称：</label>
-            <input id="nick_name" type="text" name="" class="input_txt" value="{{ data.user.nick_name }}">
-        </div>
-        <div class="form-group">
-            <label>性别：</label>
-            <input class="gender" type="radio" name="gender" checked="checked" value="MAN"> <b>男</b>&nbsp;&nbsp;&nbsp;&nbsp;
-            <input class="gender" type="radio" name="gender" value="WOMAN">  <b>女</b>
-        </div>
-        <div class="form-group">
-            <input type="submit" value="保 存" class="input_sub">
-        </div>
-    </form>
+    {% endfor %}
+
+    <!-- 个性签名错误提示-->
+    <div class="alert alert-danger" style="padding: 0px;border: 0px; line-height: 40px;font-size: 20px;" role="alert">
+        {% for err in form.signature.errors %}
+            <div class="col-md-12">
+                <font style="color: red">{{ err }}</font>
+            </div>
+        {% endfor %}
+
+    </div>
+
+    <div class="alert alert-danger" style="padding: 0px;border: 0px; line-height: 40px;font-size: 20px;" role="alert">
+        {% for err in form.nick_name.errors %}
+            <div class="col-md-12">
+                <font style="color: red">{{ err }}</font>
+            </div>
+        {% endfor %}
+    </div>
+
+
+    <div class="form-group">
+        <!-- 个性签名-->
+        <div class="col-12"></div>
+        <!--       <p style="text-align: center;color: red;">{{ form.signature.errors.0 }}</p>-->
+        {{ form.signature.label }}
+        {{ form.signature(value=user.signature) }}
+
+
+    </div>
+    <div class="form-group">
+        <!-- 用户昵称-->
+        {{ form.nick_name.label }}
+        {{ form.nick_name(value=user.nick_name) }}
+    </div>
+    <div class="form-group">
+        {{ form.gender.label }}
+        {{ form.gender(value=user.gender) }}
+    </div>
+    <div class="form-group">
+        {{ form.submit }}
+        {{ form.csrf_token }}
+    </div>
+</form>
+<script src="{{ url_for('static',filename='news/js/jquery-1.12.4.min.js') }}"></script>
+<script src="{{ url_for('static',filename='bootstrap/js/bootstrap.min.js') }}"></script>
+<!--
+{#<script type="text/javascript" src="{{ url_for('static',filename='news/js/user_base_info.js') }}"></script>#}
+-->
+<script>
+    $().ready(function () {
+        var value = $('#gender').attr("value");
+        var lis = $('#gender').find("input");
+        if (value === "WOMAN") {
+            lis[1].checked = "checked";
+        } else {
+            lis[0].checked = "checked";
+        }
+
+    })
+</script>
 </body>
 </html>

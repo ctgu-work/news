@@ -1,32 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>用户中心</title>
-	<link rel="stylesheet" type="text/css" href="../../static/news/css/reset.css">
-	<link rel="stylesheet" type="text/css" href="../../static/news/css/main.css">
-    <script type="text/javascript" src="../../static/news/js/jquery-1.12.4.min.js"></script>
-    <script type="text/javascript" src="../../static/news/js/user_pass_info.js"></script>
+    <meta charset="UTF-8">
+    <title>用户中心</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/reset.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/main.css') }}">
+    <script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery-1.12.4.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='news/js/user_pass_info.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='bootstrap/css/bootstrap.min.css') }}">
 </head>
 <body class="inframe_body">
-    <form class="pass_info">
-        <h3>密码修改</h3>
-        <div class="form-group">
-            <label>当前密码：</label>
-            <input type="password" name="old_password" class="input_txt">
+<form method="POST">
+    <h3>密码修改</h3>
+    <div class="alert alert-danger" style="padding: 0px;border: 0px; line-height: 40px;font-size: 20px;" role="alert">
+        {% for err in form.oldPassword.errors %}
+            <div class="col-md-12">
+                <font style="color: red">{{ err }}</font>
+            </div>
+        {% endfor %}
+
+    </div>
+    <div class="alert alert-danger" style="padding: 0px;border: 0px; line-height: 40px;font-size: 20px;" role="alert">
+        {% for err in form.newPassword.errors %}
+            <div class="col-md-12">
+                <font style="color: red">{{ err }}</font>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="alert alert-danger" style="padding: 0px;border: 0px; line-height: 40px;font-size: 20px;" role="alert">
+        {% for err in form.confirmPassword.errors %}
+            <div class="col-md-12">
+                <font style="color: red">{{ err }}</font>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!--成功提示 -->
+    {% for msg in get_flashed_messages(category_filter=['ok']) %}
+        <div class="alert alert-success alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×
+            </button>
+            <h4><i class="icon fa fa-check"></i>{{ msg }}</h4>
         </div>
-        <div class="form-group">
-            <label>新密码：</label>
-            <input type="password" name="new_password" class="input_txt">
+    {% endfor %}
+    <!--成功提示 -->
+
+    <!--错误提示 -->
+    {% for msg in get_flashed_messages(category_filter=['error']) %}
+        <div class="alert alert-danger alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×
+            </button>
+            <h4><i class="icon fa fa-check"></i>{{ msg }}</h4>
         </div>
-        <div class="form-group">
-            <label>确认密码：</label>
-            <input type="password" name="new_password2" class="input_txt">
-        </div>
-       <div class="error_tip">提示信息</div>
-        <div class="form-group">
-            <input type="submit" value="保 存" class="input_sub">
-        </div>
-    </form>
+    {% endfor %}
+    <!--错误提示 -->
+
+    <div class="form-group">
+        {{ form.oldPassword.label }}
+        {{ form.oldPassword }}
+    </div>
+    <div class="form-group">
+        {{ form.newPassword.label }}
+        {{ form.newPassword }}
+    </div>
+    <div class="form-group">
+        {{ form.confirmPassword.label }}
+        {{ form.confirmPassword }}
+    </div>
+    <div class="error_tip">提示信息</div>
+    <div class="form-group">
+
+        {{ form.submit }}
+        {{ form.csrf_token }}
+
+    </div>
+</form>
+<script src="{{ url_for('static',filename='news/js/jquery-1.12.4.min.js') }}"></script>
+<script src="{{ url_for('static',filename='bootstrap/js/bootstrap.min.js') }}"></script>
 </body>
 </html>
