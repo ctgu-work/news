@@ -1,4 +1,4 @@
-{% extends "news/base.html" %}
+{% extends "news/base1.html" %}
 
 {% block titleBlock %}
 文章详情页
@@ -52,7 +52,7 @@
             {{ data.news.comments_count }}条评论
         </div>
         <div class="comment_list_con">
-            {% for comment in data.comments %}
+            {% for comment in data.comment_list %}
                 <div class="comment_list">
                     <div class="person_pic fl">
                         <img src="{% if comment.user.avatar_url %}
