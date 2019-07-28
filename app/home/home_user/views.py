@@ -65,7 +65,6 @@ def user_pic_info():
     return render_template('news/user_pic_info.html', form=form, user=getUser())
 
 
-
 # 我的关注
 @home_user.route('/user_follow/<int:page>')
 def user_follow(page=None):
@@ -156,6 +155,7 @@ def getUser():
     return user
 
 
+# 取关
 @home_user.route('/unattention/<name>', methods=["GET", "POST"])
 def unattention(name):
     from app.models import User
@@ -173,6 +173,7 @@ def unattention(name):
     return jsonify({"msg": "true"})
 
 
+# 关注
 @home_user.route('/attention/<name>', methods=["POST", "GET"])
 def attention(name):
     from app.models import User
@@ -185,3 +186,20 @@ def attention(name):
     from app import db
     db.session.commit()
     return jsonify({"msg": "true"})
+
+
+# 进入别人的界面
+@home_user.route('/atnuser/<name>,<int:page>')
+def atnuser(name, page):
+    from app.models import User, News
+    user = getUser()
+    idol = User.query.filter(User.nick_name == name).first()
+    list = idol.followers.filter(User.id == user.id).first()
+    if list is not None:
+        is_attention = 'True'  # 记录是否被关注
+    else:
+        is_attention = "False"
+
+    print(is_attention)
+    page_data = idol.news_list.order_by(News.id.asc()).paginate(page=page, per_page=6)
+    return render_template("news/other.html", user=user, idol=idol, page_data=page_data, is_attention=is_attention)
