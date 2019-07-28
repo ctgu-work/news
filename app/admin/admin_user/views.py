@@ -1,6 +1,5 @@
 #coding=utf-8
-from _datetime import datetime
-import time
+import datetime
 
 from . import admin_user
 from flask import render_template,request,session,json
@@ -26,33 +25,31 @@ def count():
     # 日新增用户
     total_day = 0
     user_list = User.query.all()
-    now = datetime.now()
+    now = datetime.datetime.now()
     for i in user_list:
         if (now -i.create_time).days < 30:
             total_month += 1
         if (now - i.create_time).days < 1:
             total_day += 1
-    hour = datetime.now().hour + 1
-    minute = datetime.now().minute
-    i = 0
+    i = 1
     times = []
+    nums = []
     while(i <= 12):
+        t = now + datetime.timedelta(days=-i+1)
+        times.append(str(t.strftime('%Y-%m-%d')))
         i += 1
-        if hour < 0:
-            hour += 24
-        t = str(hour)+":"+str(minute)
-        times.append(t)
-        hour -= 1
     times = times[::-1]
-    count = []
-    i = 12
-    while(i >= 0):
-        num = 0
+    i = 0
+    user_list = User.query.all()
+    while(i < 12):
+        count = 0
         for j in user_list:
-            if (now - j.last_login).hour < i:
-                num += 1
-        count.append(num)
-    return render_template('admin/user_count.html' , total = total , total_month = total_month , total_day = total_day , times = times , count = count)
+            if (now - j.last_login).days > i-1 and (now - j.last_login).days < i + 1:
+                count += 1
+        nums.append(count)
+        i += 1
+    nums = nums[::-1]
+    return render_template('admin/user_count.html' , total = total , total_month = total_month , total_day = total_day , times = times , nums = nums)
 
 @admin_user.route('/list')
 def list():
