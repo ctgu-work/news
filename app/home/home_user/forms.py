@@ -1,7 +1,7 @@
 # coding:utf8
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, RadioField, SubmitField, PasswordField, Form
+from wtforms import StringField, RadioField, SubmitField, PasswordField, FileField
 from wtforms.validators import DataRequired, ValidationError
 from wtforms import validators, widgets
 
@@ -58,7 +58,7 @@ class UserBaseForm(FlaskForm):
 
     )
     submit = SubmitField(
-        '登录',
+        '确认',
         render_kw={
             "class": "btn btn-primary btn-block btn-flat"
         }
@@ -106,4 +106,22 @@ class ModifyPassowrd(FlaskForm):
         render_kw={
             "class": "btn btn-primary btn-block btn-flat"
         }
+    )
+
+
+class UserImg(FlaskForm):
+    url = FileField(
+        label="上传头像: ",
+        validators=[
+            DataRequired("请上传图片")
+        ],
+        description="头像"
+    )
+    
+    submit = SubmitField(
+        '提交',
+        render_kw={
+            "class": "btn btn-primary btn-block btn-flat"
+        }
+
     )

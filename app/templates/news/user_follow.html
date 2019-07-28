@@ -21,10 +21,17 @@
     {#    {{user_list|length}}#}
     {% for v in range(0,user_list|length) %}
         <li class="author_card card_list">
-            <a href="#" target="_blank" class="author_pic"><img
-                    src="{{ url_for('static',filename='news/images/cat.jpg') }}"
-                    alt="author_pic"></a>
-            <a href="#" target="_blank" class="author_name">{{ user_list[v].nick_name }}</a>
+            <a href="#" target="_blank" class="author_pic">
+                <img
+                        {% if user_list[v].avatar_url %}
+                            src="{{ user_list[v].avatar_url }}"
+                        {% else %}
+                            src="{{ url_for('static',filename='news/images/cat.jpg') }}"
+                        {% endif %}
+                            alt="author_pic">
+            </a>
+            <a href="{{ url_for('/user.atnuser',name=user_list[v].nick_name,page=1) }}" target="_blank"
+               class="author_name">{{ user_list[v].nick_name }}</a>
             <div class="author_resume">{{ user_list[v].signature }}</div>
             <div class="writings"><span>总篇数</span><b>{{ news_count[v] }}</b></div>
             <div class="follows"><span>粉丝</span><b>{{ attention_count[v] }}</b></div>
@@ -36,10 +43,17 @@
         </li>
     {% endfor %}
 </ul>
-<!-- 分页按钮-->
-<div class="box-footer clearfix center-block">
-    {{ pg.page(page_data,'/user.user_follow') }}
-</div>
+
+{% if page_data.items | length == 0 %}
+    <li class="list-group-item list-group-item-info">你还没有任何关注QAQ</li>
+{% else %}
+    <!-- 分页按钮-->
+    <div class="box-footer clearfix center-block">
+        {{ pg.page(page_data,'/user.user_follow') }}
+    </div>
+{% endif %}
+
+
 <script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery-1.12.4.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery.pagination.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static',filename='news/js/user_follow.js') }}"></script>
@@ -51,6 +65,7 @@
         '        <h4><i class="icon fa fa-check"></i> 操作成功</h4>\n' +
         '\n' +
         '    </div>';
+
     function unattention(e) {
         console.log("取关...");
         var parent = $(e).parent();
@@ -85,7 +100,7 @@
             url: "/user/attention/" + children[1].innerText,
             success: function (data) {
                 if (data.msg == "true") {
-                     $('#info-success').after($info);
+                    $('#info-success').after($info);
                 } else {
                     console.log("关注失败...")
                 }

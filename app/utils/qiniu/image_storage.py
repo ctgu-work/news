@@ -22,6 +22,7 @@ def storage(data):
     return ret["key"]  # 具体地址
 
 
+# 访问前缀 http://pv875q204.bkt.clouddn.com/
 if __name__ == '__main__':
     file = input('请输入文件路径')
     with open(file, 'rb') as f:  # 读文件的基础操作 ，rb二进制形式读取

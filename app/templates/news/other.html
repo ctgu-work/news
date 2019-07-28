@@ -1,0 +1,98 @@
+{% extends "news/home.html" %}
+{% block content %}
+    {% import "news/user_page2.html" as pg %}
+    <div class="conter_con">
+        <div class="user_menu_con fl">
+            <div class="user_center_pic">
+                <img {% if idol.avatar_url %}src="{{ idol.avatar_url }}" {% else %}
+                     src="../../static/news/images/person01.png"{% endif %} alt="用户图片">
+                {#                <img src="../images/user_pic.png" alt="用户图片">#}
+            </div>
+            <div id="person_name" class="user_center_name">{{ idol.nick_name }}</div>
+
+            <ul class="other_detail">
+                <li>性 别：{% if idol.gender == 'MAN' %}
+                    男
+                {% else %}
+                    女
+                {% endif %} </li>
+                <li>签 名：{{ idol.signature }}</li>
+            </ul>
+
+            <div class="focus_other">
+                {% if is_attention == "False" %}
+                    <a href="javascript:;" onclick="atten()" class="focus">关注</a>
+                {% else %}
+                    <a href="javascript:;" onclick="unatten()" class="focused"><span class="out">已关注</span><span
+                            class="over">取消关注</span></a>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="user_con fr">
+            <div class="other_collect">
+                <h3>ta 的文章</h3>
+                <ul class="article_list">
+                    {% for v in page_data.items %}
+                        <li><a href="#">{{ v.title }}</a><span>{{ v.update_time }}</span></li>
+                    {% endfor %}
+                </ul>
+                {% if page_data.items | length != 0 %}
+                    <!-- 分页按钮-->
+                    <div class="box-footer clearfix center-block">
+                        {{ pg.page(page_data,'/user.atnuser',name=idol.nick_name) }}
+                    </div>
+                {% else %}
+                     <li class="list-group-item list-group-item-info">ta还没有发布文章QAQ</li>
+                {% endif %}
+
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        function atten() {
+            $.ajax({
+                type: "POST",
+                url: "/user/attention/" + $('#person_name').text(),
+                success: function (data) {
+                    if (data.msg == "true") {
+                        console.log("关注success");
+                        location.reload();
+                        {#$('#info-success').after($info);#}
+                    } else {
+                        console.log("关注失败...")
+                    }
+                },
+                error: function (error) {
+                    console.log("程序出错了...")
+                }
+            });
+        }
+
+        function unatten() {
+            console.log("name:" + $('#person_name').text())
+            $.ajax({
+                type: "POST",
+                url: "/user/unattention/" + $('#person_name').text(),
+                success: function (data) {
+                    if (data.msg == "true") {
+                        console.log("取关success");
+                        location.reload();
+                        {#$('#info-success').after($info);#}
+                    } else {
+                        console.log("取关失败...")
+                    }
+                },
+                error: function (error) {
+                    console.log("取关程序出错了...")
+                }
+            });
+        }
+    </script>
+{% endblock %}
+
