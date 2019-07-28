@@ -6,7 +6,11 @@ function getCookie(name) {
 $(function(){
     $(".news_edit").submit(function (e) {
         e.preventDefault()
-        // TODO 新闻编辑提交
+
+
+        $(this)
+
+
     })
 })
 

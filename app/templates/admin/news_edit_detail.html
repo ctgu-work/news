@@ -25,8 +25,8 @@
             <div class="form_group">
                 <label>新闻分类：</label>
                 <select class="sel_opt" name="category_id">
-                    {% for category in data.categories %}
-                        <option value="{{ category.id }}" {% if category.is_selected %}selected{% endif %}>{{ category.name }}</option>
+                    {% for category in data.category_list %}
+                        <option value="{{ category.id }}" {% if category.selected %}selected{% endif %}>{{ category.name }}</option>
                     {% endfor %}
                 </select>
             </div>
