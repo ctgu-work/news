@@ -13,3 +13,4 @@ def edit():
 @admin_news.route('/type')
 def type():
     return render_template('admin/news_type.html')
+

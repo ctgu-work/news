@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户中心</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/reset.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/jquery.pagination.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='bootstrap/css/bootstrap.min.css') }}">
+</head>
+<body class="inframe_body">
+{% import "news/user_page.html" as pg %}
+<div class="my_collect">
+    <h3>我的收藏</h3>
+    <ul class="article_list">
+
+        {% for v in page_data.items %}
+            <li><a href="#">{{ v.title }}</a><span>{{ v.update_time }}</span></li>
+        {% endfor %}
+    </ul>
+
+    <!-- 分页按钮-->
+    <div class="box-footer clearfix center-block">
+        {{ pg.page(page_data,'/user.user_collection') }}
+    </div>
+    <!-- 分页按钮-->
+
+    {#    <div id="pagination" class="page"></div>#}
+    <script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery-1.12.4.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery.pagination.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='bootstrap/js/bootstrap.min.js') }}"></script>
+    <script>
+        $(function () {
+            $("#pagination").pagination({
+                currentPage: 2,
+                totalPage: 3,
+                callback: function (current) {
+                    alert('ok!');
+                }
+            });
+        });
+    </script>
+
+</div>
+</body>
+</html>

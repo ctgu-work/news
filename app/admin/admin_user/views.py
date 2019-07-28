@@ -63,6 +63,7 @@ def list():
     total_page = page.pages
     return render_template('admin/user_list.html',user_list = user_list , cur_page = cur_page , total_page = total_page)
 
+
 @admin_user.route('/getList')
 def getList():
     from app.models import User
@@ -71,3 +72,4 @@ def getList():
     user_list = page.items
     total_page = page.pages
     return render_template('admin/user_list.html',user_list = user_list , cur_page = cur_page , total_page = total_page)
+
