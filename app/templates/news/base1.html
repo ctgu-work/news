@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="../../static/news/css/main.css">
     <script type="text/javascript" src="../../static/news/js/jquery-1.12.4.min.js"></script>
     <script type="text/javascript" src="../../static/news/js/main.js"></script>
-    {% block script_block %}
+    {% block scriptBlock %}
 
     {% endblock %}
 </head>
@@ -23,13 +23,13 @@
         {% endblock %}
 
         {# 判断用户是否登录 #}
-        {% if user %}
+        {% if data.user %}
 
             <div class="user_login fr">
-                <img {% if user.avatar_url %}src="{{ user.avatar_url }}" {% else %}
+                <img {% if data.user.avatar_url %}src="{{ data.user.avatar_url }}" {% else %}
                      src="../../static/news/images/person01.png"{% endif %} class="lgin_pic">
 {#                <a href="{{ url_for("user.user_info") }}" id="nick_name">{{ user.nick_name }}</a>#}
-                <a href="" id="nick_name">{{ user.nick_name }}</a>
+                <a href="" id="nick_name">{{ data.user.nick_name }}</a>
                 <a href="javascript:;" onclick="logout()">退出</a>
             </div>
 
@@ -45,20 +45,20 @@
 </div>
 
 <div class="conter_con">
-    {% block content_block %}
+    {% block contentBlock %}
 
     {% endblock %}
 
     {% block rank_block %}
         <div class="rank_con fr">
-            {% block author_block %}
+            {% block authorBlock %}
 
             {% endblock %}
             <div class="rank_title">
                 <h3>点击排行</h3>
             </div>
             <ul class="rank_list">
-                {% for news in news_list %}
+                {% for news in data.news_list %}
                     <li><span class="{{ loop.index  }}">{{ loop.index }}</span><a
                             href="/news/{{ news.id }}">{{ news.title }}</a></li>
                 {% endfor %}
