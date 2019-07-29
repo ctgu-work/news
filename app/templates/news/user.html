@@ -4,9 +4,11 @@
     <div class="conter_con">
         <div class="user_menu_con fl">
             <div class="user_center_pic">
-                <img src="{{ url_for('static',filename='news/images/user_pic.png') }}" alt="用户图片">
+                <img {% if user.avatar_url %}src="{{ user.avatar_url }}" {% else %}
+                     src="../../static/news/images/person01.png"{% endif %} class="now_user_pic">
+                {#                <img src="{{ url_for('static',filename='news/images/user_pic.png') }}" alt="用户图片">#}
             </div>
-            <div class="user_center_name">用户张山</div>
+            <div class="user_center_name">{{ user.nick_name }}</div>
 
             <ul class="option_list">
                 <li class="active"><a href="{{ url_for('/user.user_base') }}" target="main_frame">基本资料</a></li>

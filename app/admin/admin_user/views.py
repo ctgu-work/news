@@ -4,15 +4,27 @@ import datetime
 from . import admin_user
 from flask import render_template,request,session,json
 from app.constants import *
+from sqlalchemy import and_
+
+# @admin_user.before_request
+# def check():
+#     if 'user' in session:
+#         return render_template('admin/login.html')
+#     else:
+#         pass
 
 @admin_user.route('/login' , methods = ['GET','POST'])
 def login():
+    from app.models import User
     if request.method == "POST":
         username = request.form.get('username')
         password = request.form.get('password')
-        if username == "admin" and password == "admin":
+        user = User.query.filter(and_(User.is_admin==1 , User.nick_name == username , User.password_hash == password)).first()
+        print(user)
+        if user != None:
             return render_template('admin/index.html')
-
+        else:
+            session['user'] = user
     return render_template('admin/login.html')
 
 @admin_user.route('/count')
