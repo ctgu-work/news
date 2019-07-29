@@ -6,6 +6,7 @@ from app.utils.response_code import RET
 from app.utils.qiniu.image_storage import storage
 from app import constants
 
+
 @admin_news.route('/index')
 def index():
     return render_template("admin/index.html")
@@ -158,6 +159,7 @@ def edit():
 def edit_detail():
     from app.models import News
     from app.models import Category
+    from app import db
     # 如果是GET请求
     if request.method == 'GET':
         news_id = request.args.get("news_id")
@@ -185,6 +187,7 @@ def edit_detail():
             "category_list":category_list
         }
         return render_template('admin/news_edit_detail.html',data=data)
+
     # 如果是POST请求
     else:
         news_id = request.form.get("news_id")
@@ -194,7 +197,7 @@ def edit_detail():
         index_image = request.files.get("index_image")
         category_id = request.form.get("category_id")
 
-        if not all([news_id,title,digest,content,index_image,category_id]):
+        if not all([news_id,title,digest,content,category_id]):
             return jsonify(errno=RET.PARAMERR,msg="参数不全")
         try:
             news = News.query.get(news_id)
@@ -205,25 +208,81 @@ def edit_detail():
                 index_image_name = storage(index_image.read())
             except Exception as e:
                 return jsonify(errno=RET.THIRDERR,msg="网络异常")
-        if not index_image_name:
-            return jsonify(errno=RET.NODATA,msg="上传图片失败")
-        news.index_image_url = constants.QINIU_DOMIN_PREFIX + index_image_name
+            if not index_image_name:
+                return jsonify(errno=RET.NODATA,msg="上传图片失败")
+            news.index_image_url = constants.QINIU_DOMIN_PREFIX + index_image_name
     news.title = title
     news.digest = digest
     news.category_id = category_id
     news.content = content
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
     # 2.9: 返回响应
     return jsonify(errno=RET.OK,msg="操作成功")
 
-
+# 返回新闻分类页面
 @admin_news.route('/type')
 def type():
-    return render_template('admin/news_type.html')
+    from app.models import Category
 
+    categories = Category.query.filter(Category.id != 1).all()
+    category_list = []
+    for category in categories:
+        category_list.append(category.to_dict())
+    return render_template('admin/news_type.html',category_list=category_list)
 
+# 修改/添加 新闻分类的操作
+@admin_news.route('/type_handle',methods=['POST'])
+def type_handle():
+    from app.models import Category
+    from app import db
+    # 先将id和name取出，如果没有id，则为添加，反之为修改
+    category_id = request.json.get("id")
+    name = request.json.get("name")
+    print(category_id)
+    # 参数校验
+    if not name:
+        return  jsonify(errno=RET.PARAMERR,msg="参数不全")
+    try:
+        categories = Category.query.all()
+    except Exception as e:
+        return jsonify(errno=RET.DBERR,msg="分类查询失败")
+    category_name = []
+    for category in categories:
+        category_name.append(category.name)
+    # 判断是否有id
+    if category_id:
+        try:
+            category = Category.query.get(category_id)
+        except Exception as e:
+            return jsonify(errno=RET.DBERR,msg="分类查询失败")
 
+        if not category:
+            return jsonify(errno=RET.NODATA, errmsg="分类不存在")
+        # 判断更改的name是否存在
+        if name in category_name:
+            return jsonify(errno=RET.DATAEXIST, errmsg="分类重复,不能修改")
+        # 更改
+        category.name = name
+    else:
+        # 如果name已存在，则不能添加
+        if name in category_name:
+            return jsonify(errno=RET.DATAEXIST, errmsg="分类重复,不能添加")
+        # 新建一个category
+        category = Category()
+        # 注入name
+        category.name = name
+        # 添加到数据库
+        db.session.add(category)
+    try:
+        # 提交
+        db.session.commit()
+    except Exception as e:
+        # 回滚
+        db.session.rollback()
+        return jsonify(errno=RET.DBERR,msg="数据保存失败")
 
-
-
-
+    return jsonify(errno=RET.OK,msg="操作成功")
 

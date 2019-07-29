@@ -7,8 +7,8 @@ $(function(){
     $(".news_edit").submit(function (e) {
         e.preventDefault()
 
-
         $(this).ajaxSubmit({
+
             beforeSubmit: function (request) {
                 // 在提交之前，对参数进行处理
                 for(var i=0; i<request.length; i++) {
