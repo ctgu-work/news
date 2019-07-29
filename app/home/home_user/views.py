@@ -203,3 +203,11 @@ def atnuser(name, page):
     print(is_attention)
     page_data = idol.news_list.order_by(News.id.asc()).paginate(page=page, per_page=6)
     return render_template("news/other.html", user=user, idol=idol, page_data=page_data, is_attention=is_attention)
+
+
+@home_user.before_request
+def before_request():
+    if "user_id" in session:
+        pass
+    else:
+        return redirect("/index")
