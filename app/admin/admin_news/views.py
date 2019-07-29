@@ -286,3 +286,4 @@ def type_handle():
 
     return jsonify(errno=RET.OK,msg="操作成功")
 
+
