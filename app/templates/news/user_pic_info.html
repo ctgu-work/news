@@ -5,23 +5,30 @@
     <title>用户中心</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/reset.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='news/css/main.css') }}">
-    <script type="text/javascript" src="{{ url_for('static',filename='news/js/user_pic_info.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='bootstrap/css/bootstrap.min.css') }}">
+
+
 </head>
 <body class="inframe_body">
-<form class="pic_info">
+<form method="post" enctype='multipart/form-data'>
     <h3>头像设置</h3>
     <div class="form-group">
         <label class="label01">当前图像：</label>
-        <img src="{{ url_for('static',filename='news/images/user_pic.png') }}" alt="用户图片" class="now_user_pic">
+        <img {% if user.avatar_url %}src="{{ user.avatar_url }}" {% else %}
+             src="../../static/news/images/person01.png"{% endif %} class="now_user_pic">
     </div>
     <div class="form-group">
-        <label>上传图像：</label>
-        <input type="file" name="avatar" class="input_file">
+        {{ form.url.label }}
+        {{ form.url }}
     </div>
 
     <div class="form-group">
-        <input type="submit" value="保 存" class="input_sub">
+        {{ form.submit }}
+        {{ form.csrf_token }}
     </div>
 </form>
+<script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery-1.12.4.min.js') }}"></script>
+<script src="{{ url_for('static',filename='bootstrap/js/bootstrap.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static',filename='news/js/user_pic_info.js') }}"></script>
 </body>
 </html>

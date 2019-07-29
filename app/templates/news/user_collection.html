@@ -19,27 +19,22 @@
         {% endfor %}
     </ul>
 
-    <!-- 分页按钮-->
-    <div class="box-footer clearfix center-block">
-        {{ pg.page(page_data,'/user.user_collection') }}
-    </div>
-    <!-- 分页按钮-->
+    {% if page_data.items | length ==0 %}
+        <li class="list-group-item list-group-item-info">你还没有收藏QAQ</li>
+    {% else %}
+        <!-- 分页按钮-->
+        <div class="box-footer clearfix center-block">
+            {{ pg.page(page_data,'/user.user_collection') }}
+        </div>
+        <!-- 分页按钮-->
+    {% endif %}
+
 
     {#    <div id="pagination" class="page"></div>#}
     <script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery-1.12.4.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static',filename='news/js/jquery.pagination.min.js') }}"></script>
     <script src="{{ url_for('static',filename='bootstrap/js/bootstrap.min.js') }}"></script>
-    <script>
-        $(function () {
-            $("#pagination").pagination({
-                currentPage: 2,
-                totalPage: 3,
-                callback: function (current) {
-                    alert('ok!');
-                }
-            });
-        });
-    </script>
+{#    u7#}
 
 </div>
 </body>

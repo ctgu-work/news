@@ -81,4 +81,3 @@ def getList():
     user_list = page.items
     total_page = page.pages
     return render_template('admin/user_list.html',user_list = user_list , cur_page = cur_page , total_page = total_page)
-
