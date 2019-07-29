@@ -22,7 +22,7 @@ def login():
         user = User.query.filter(and_(User.is_admin==1 , User.nick_name == username)).first()
         if user.check_password(password):
             session['admin_name'] = username
-            return render_template('admin/index.html')
+            return render_template('admin/index.html',user = user)
     return render_template('admin/login.html')
 
 @admin_user.route('/count')
