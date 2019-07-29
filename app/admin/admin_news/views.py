@@ -143,8 +143,7 @@ def edit():
     # 初始化新闻List，并将每一项加入List
     newsList = []
     for new in items:
-        newsList.append(new.to_review_dict())
-
+        newsList.append(new.to_dict())
     # 封装前端所需数据
     data = {
         "totalPage" : total,
@@ -210,7 +209,10 @@ def edit_detail():
                 return jsonify(errno=RET.THIRDERR,msg="网络异常")
             if not index_image_name:
                 return jsonify(errno=RET.NODATA,msg="上传图片失败")
-            news.index_image_url = constants.QINIU_DOMIN_PREFIX + index_image_name
+            news.index_image_url = "http://pv875q204.bkt.clouddn.com/" + index_image_name
+
+
+
     news.title = title
     news.digest = digest
     news.category_id = category_id
