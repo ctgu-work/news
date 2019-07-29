@@ -1,6 +1,5 @@
 #coding=utf-8
 import datetime
-
 from . import admin_user
 from flask import render_template,request,session,json
 from app.constants import *
@@ -16,15 +15,14 @@ from sqlalchemy import and_
 @admin_user.route('/login' , methods = ['GET','POST'])
 def login():
     from app.models import User
+    import app.models
     if request.method == "POST":
         username = request.form.get('username')
         password = request.form.get('password')
-        user = User.query.filter(and_(User.is_admin==1 , User.nick_name == username , User.password_hash == password)).first()
-        print(user)
-        if user != None:
+        user = User.query.filter(and_(User.is_admin==1 , User.nick_name == username)).first()
+        if user.check_password(password):
+            session['admin_name'] = username
             return render_template('admin/index.html')
-        else:
-            session['user'] = user
     return render_template('admin/login.html')
 
 @admin_user.route('/count')
