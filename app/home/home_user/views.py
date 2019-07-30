@@ -1,7 +1,8 @@
 from . import home_user
-from flask import render_template, request, redirect, session, flash, jsonify, url_for
+from flask import render_template, request, redirect, session, flash, jsonify, url_for, current_app
 from .forms import UserBaseForm, ModifyPassowrd
-
+from app.utils.response_code import RET
+from app import constants
 
 # 测试
 @home_user.route('/test1')
@@ -127,16 +128,6 @@ def user_collection(page=None):
     return render_template('news/user_collection.html', page_data=page_data)
 
 
-# 新闻发布
-@home_user.route('/user_news_release/')
-def user_news_release():
-    return render_template('news/user_news_release.html')
-
-
-# 新闻列表
-@home_user.route('/user_news_list/')
-def user_news_list():
-    return render_template('news/user_news_list.html')
 
 
 def getUser():
@@ -175,3 +166,207 @@ def attention(name):
     from app import db
     db.session.commit()
     return jsonify({"msg": "true"})
+
+
+@home_user.route('/examine_news_list/<int:page>')
+def examine_news_list(page):
+    from app.models import User,News
+
+    # 1. 取参数
+    examine_id = session["user_id"]
+
+    # 2. 判断参数
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    try:
+        examine = User.query.get(examine_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据查询失败")
+
+    if not examine:
+        return jsonify(errno=RET.NODATA, errmsg="当前用户不存在")
+
+    try:
+        paginate = examine.news_list.order_by(News.create_time.desc()).paginate(page, constants.USER_COLLECTION_MAX_NEWS, False)
+        news_li = paginate.items
+        current_page = paginate.page
+        total_page = paginate.pages
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据查询失败")
+
+    news_dict_li = []
+    for news_li_item in news_li:
+        news_dict_li.append(news_li_item.to_review_dict())
+
+
+    # data = {
+    #     "news_list": news_dict_li,
+    #     "total_page": total_page,
+    #     "current_page": current_page
+    # }
+    return render_template('news/user_news_list.html', news_list=news_dict_li, total_page = total_page, current_page  = current_page)
+
+
+@home_user.route('/news_release', methods=["GET", "POST"])
+def user_news_release():
+    from app.models import User,Category, News
+
+    from app.utils.qiniu.image_storage import storage
+
+    from app import db
+
+
+    if request.method == "GET":
+        # 加载新闻分类数据
+        categories = []
+        try:
+            categories = Category.query.all()
+        except Exception as e:
+            current_app.logger.error(e)
+
+        category_dict_li = []
+        for category in categories:
+            category_dict_li.append(category.to_dict())
+
+        # 移除最新的分类
+        category_dict_li.pop(0)
+
+        return render_template('news/user_news_release.html', data={"categories": category_dict_li})
+
+    # 取参数
+    user_id = session["user_id"]
+    # 1. 取到请求参数
+    source = "个人发布" # 来源
+    title = request.form.get("title")
+    category_id = request.form.get("category_id")
+    digest = request.form.get("digest")
+    index_image = request.files.get("index_image")
+    content = request.form.get("content")
+    # 参数转换
+    try:
+        category_id = int(category_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="参数有误")
+
+    # 上传七牛云
+    try:
+        index_image_data = index_image.read()
+        key = storage(index_image_data)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="参数有误")
+
+    # 2. 判断参数
+    if not all([title, category_id, digest, index_image, content]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    new = News()
+    new.title = title
+    new.digest = digest
+    new.source = source
+    new.content = content
+    new.index_image_url = "http://pv875q204.bkt.clouddn.com/" + key
+    new.category_id = category_id
+    new.user_id = user_id
+    # 1代表待审核状态
+    new.status = 1
+
+    try:
+        # 插入提交数据
+        db.session.add(new)
+        db.session.commit()
+    except Exception as e:
+        # 数据库回滚
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库操作有误")
+
+    return jsonify(errno=RET.OK, errmsg="OK")
+
+
+@home_user.route('/news_release1/<int:new_id>', methods=["GET", "POST"])
+def user_news_release1(new_id):
+    from app.models import User,Category, News
+
+    from app.utils.qiniu.image_storage import storage
+
+    from app import db
+
+    if request.method == "GET":
+        # 加载新闻数据
+        news = News.query.get(new_id)
+        session["new_id"] = new_id
+        category = Category.query.get(news.category_id)
+        print(category)
+        data = {
+            "news": news.to_dict(),
+            "category": category.to_dict()
+        }
+
+        return render_template('news/user_news_release1.html', data=data)
+
+
+@home_user.route('/news_release2', methods=["GET", "POST"])
+def user_news_release2():
+    from app.models import User, Category, News
+
+    from app.utils.qiniu.image_storage import storage
+
+    from app import db
+
+    # 取参数
+    new_id = session.get("new_id")
+    news = News.query.get(new_id)
+    user_id = session["user_id"]
+    # 1. 取到请求参数
+    source = "个人发布" # 来源
+    title = request.form.get("title")
+    category_id = request.form.get("category_id")
+    digest = request.form.get("digest")
+    index_image = request.files.get("index_image")
+    content = request.form.get("content")
+    # 参数转换
+    try:
+        category_id = int(category_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="参数误")
+
+    # 上传七牛云
+    if index_image:
+        index_image_data = index_image.read()
+        key = storage(index_image_data)
+
+    # # 2. 判断参数
+    # if not all([title, category_id, digest, index_image, content]):
+    #     return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    news.title = title
+    news.digest = digest
+    news.source = source
+    news.content = content
+    if not index_image:
+        news.index_image_url = news.index_image_url
+    else:
+        news.index_image_url = "http://pv875q204.bkt.clouddn.com/" + key
+    news.category_id = category_id
+    news.user_id = user_id
+    # 1代表待审核状态
+    news.status = 1
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        # 数据库回滚
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据库操作有误")
+
+    return jsonify(errno=RET.OK, errmsg="OK")
