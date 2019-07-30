@@ -1,18 +1,28 @@
 #coding=utf-8
 import datetime
-
 from . import admin_user
 from flask import render_template,request,session,json
 from app.constants import *
+from sqlalchemy import and_
+
+# @admin_user.before_request
+# def check():
+#     if 'user' in session:
+#         return render_template('admin/login.html')
+#     else:
+#         pass
 
 @admin_user.route('/login' , methods = ['GET','POST'])
 def login():
+    from app.models import User
+    import app.models
     if request.method == "POST":
         username = request.form.get('username')
         password = request.form.get('password')
-        if username == "admin" and password == "admin":
-            return render_template('admin/index.html')
-
+        user = User.query.filter(and_(User.is_admin==1 , User.nick_name == username)).first()
+        if user.check_password(password):
+            session['admin_name'] = username
+            return render_template('admin/index.html',user = user)
     return render_template('admin/login.html')
 
 @admin_user.route('/count')
@@ -69,4 +79,3 @@ def getList():
     user_list = page.items
     total_page = page.pages
     return render_template('admin/user_list.html',user_list = user_list , cur_page = cur_page , total_page = total_page)
-

@@ -1,14 +1,14 @@
 from . import home_user
 from flask import render_template, request, redirect, session, flash, jsonify, url_for, current_app
-from .forms import UserBaseForm, ModifyPassowrd
+from .forms import UserBaseForm, ModifyPassowrd, UserImg
 from app.utils.response_code import RET
+from app.utils.qiniu.image_storage import storage
 from app import constants
 
 # 测试
 @home_user.route('/test1')
 def test1():
     return "user"
-
 
 # /user
 # user的默认界面
@@ -23,8 +23,7 @@ def index():
 @home_user.route('/logout')
 def logout():
     session.pop("user_id", None)
-    # return render_template("news/index.html")
-    return "该功能尚未协调完成"
+    return redirect("/index/")
 
 
 # 基本信息
@@ -52,9 +51,24 @@ def user_base():
 
 
 # 头像设置
-@home_user.route('/user_pic_info/')
+@home_user.route('/user_pic_info/', methods=["POST", "GET"])
 def user_pic_info():
-    return render_template('news/user_pic_info.html')
+    form = UserImg()
+    print("img")
+    if request.method == "POST":
+        print("POST")
+        if form.validate_on_submit():
+            file = request.files.get('url').read()
+            key = storage(file)
+            print(key)
+            print(type(key))
+            user = getUser()
+            url_str = "http://pv875q204.bkt.clouddn.com/" + key
+            user.avatar_url = url_str
+            from app import db
+            db.session.commit()
+            # flash("修改失败！ ", "error")
+    return render_template('news/user_pic_info.html', form=form, user=getUser())
 
 
 # 我的关注
@@ -137,6 +151,7 @@ def getUser():
     return user
 
 
+# 取关
 @home_user.route('/unattention/<name>', methods=["GET", "POST"])
 def unattention(name):
     from app.models import User
@@ -154,6 +169,7 @@ def unattention(name):
     return jsonify({"msg": "true"})
 
 
+# 关注
 @home_user.route('/attention/<name>', methods=["POST", "GET"])
 def attention(name):
     from app.models import User
@@ -168,10 +184,34 @@ def attention(name):
     return jsonify({"msg": "true"})
 
 
+# 进入别人的界面
+@home_user.route('/atnuser/<name>,<int:page>')
+def atnuser(name, page):
+    from app.models import User, News
+    user = getUser()
+    idol = User.query.filter(User.nick_name == name).first()
+    list = idol.followers.filter(User.id == user.id).first()
+    if list is not None:
+        is_attention = 'True'  # 记录是否被关注
+    else:
+        is_attention = "False"
+
+    print(is_attention)
+    page_data = idol.news_list.order_by(News.id.asc()).paginate(page=page, per_page=6)
+    return render_template("news/other.html", user=user, idol=idol, page_data=page_data, is_attention=is_attention)
+
+
+@home_user.before_request
+def before_request():
+    if "user_id" in session:
+        pass
+    else:
+        return redirect("/index")
+
+
 @home_user.route('/examine_news_list/<int:page>')
 def examine_news_list(page):
     from app.models import User,News
-
     # 1. 取参数
     examine_id = session["user_id"]
 
@@ -215,12 +255,11 @@ def examine_news_list(page):
 
 @home_user.route('/news_release', methods=["GET", "POST"])
 def user_news_release():
-    from app.models import User,Category, News
+    from app.models import Category, News
 
     from app.utils.qiniu.image_storage import storage
 
     from app import db
-
 
     if request.method == "GET":
         # 加载新闻分类数据

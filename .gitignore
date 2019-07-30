@@ -6,3 +6,5 @@ venv/
 #忽略缓存
 __pycache__/
 app/__pycache__/
+
+.qiniu_pythonsdk_hostscache.json
