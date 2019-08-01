@@ -11,14 +11,15 @@ from app import constants
 def index():
     return render_template("admin/index.html")
 
+
 # 返回待审核页面
 @admin_news.route('/review')
 def review():
     from app.models import News
     # page:当前页，默认为1
-    page = int(request.args.get("currentPage",1))
+    page = int(request.args.get("currentPage", 1))
     # keywords:需要查询的标题，默认为空
-    keywords = request.args.get("keywords","")
+    keywords = request.args.get("keywords", "")
 
     # filters初始化为空，如果keywords不为空，则将keywords append 到filters
     filters = []
@@ -26,7 +27,7 @@ def review():
         if keywords != "":
             filters.append(News.title.contains(keywords))
 
-        pageinate = News.query.filter(*filters).paginate(page,10,False)
+        pageinate = News.query.order_by(News.create_time.desc()).filter(*filters).paginate(page, 10, False)
 
         total = pageinate.pages
         currentPage = pageinate.page
@@ -42,14 +43,15 @@ def review():
 
     # 封装前端所需数据
     data = {
-        "totalPage" : total,
-        "currentPage" : currentPage,
-        "newsList" : newsList
+        "totalPage": total,
+        "currentPage": currentPage,
+        "newsList": newsList
     }
-    return render_template('admin/news_review.html',data=data)
+    return render_template('admin/news_review.html', data=data)
+
 
 # 将review_detail分为两种请求
-@admin_news.route('/review_detail',methods=['GET','POST'])
+@admin_news.route('/review_detail', methods=['GET', 'POST'])
 def review_detail():
     from app.models import News
     from app.models import Category
@@ -64,46 +66,46 @@ def review_detail():
         except Exception as e:
             print(e)
             # 查询失败，返回错误信息。
-            return render_template('admin/news_review_detail.html',data={"msg":"新闻查询失败"})
+            return render_template('admin/news_review_detail.html', data={"msg": "新闻查询失败"})
         if not news:
             # 没有这条新闻，返回不存在信息。
-            return render_template('admin/news_review_detail.html',data={"msg":"新闻不存在"})
+            return render_template('admin/news_review_detail.html', data={"msg": "新闻不存在"})
         # 查询分类名
         category = Category.query.get(news.category_id)
         # 封装新闻和分类
         data = {
             "news": news.to_dict(),
-            "category" : category.name
+            "category": category.name
         }
         # 返回data
-        return render_template('admin/news_review_detail.html',data=data)
+        return render_template('admin/news_review_detail.html', data=data)
     # POST
     else:
         # 获取action和news_id
         action = request.json.get("action")
         news_id = request.json.get("news_id")
         # 判断参数是否正确
-        if not all([news_id,action]):
-            return jsonify(errno=RET.PARAMERR,msg="参数不全")
+        if not all([news_id, action]):
+            return jsonify(errno=RET.PARAMERR, msg="参数不全")
         # 判断action是否为["accept","reject"]
-        if not action in["accept","reject"]:
-            return jsonify(errno=RET.DATAERR,msg="操作类型错误")
+        if not action in ["accept", "reject"]:
+            return jsonify(errno=RET.DATAERR, msg="操作类型错误")
         try:
             # 通过news_id查询新闻
             news = News.query.get(news_id)
         except Exception as e:
             # 获取失败返回
-            return jsonify(errno=RET.DBERR,msg="新闻获取失败")
+            return jsonify(errno=RET.DBERR, msg="新闻获取失败")
         if not news:
             # 不存在
-            return jsonify(errno=RET.NODATA,msg="新闻不存在")
+            return jsonify(errno=RET.NODATA, msg="新闻不存在")
         # 通过验证，修改status
         if action == "accept":
             news.status = 0
         else:
             reason = request.json.get("reason")
             if not reason:
-                return jsonify(errno=RET.PARAMERR,msg="参数不全")
+                return jsonify(errno=RET.PARAMERR, msg="参数不全")
             news.reason = reason
             news.status = -1
 
@@ -113,17 +115,18 @@ def review_detail():
         except Exception as e:
             # 回滚
             db.session.rollback()
-            return jsonify(errno=RET.DBERR,msg="数据提交失败")
+            return jsonify(errno=RET.DBERR, msg="数据提交失败")
         # 返回成功
-        return jsonify(errno=RET.OK,msg="success")
+        return jsonify(errno=RET.OK, msg="success")
+
 
 # 返回新闻编辑列表页面
 @admin_news.route('/edit')
 def edit():
     from app.models import News
-    page = int(request.args.get("currentPage",1))
+    page = int(request.args.get("currentPage", 1))
     # keywords:需要查询的标题，默认为空
-    keywords = request.args.get("keywords","")
+    keywords = request.args.get("keywords", "")
 
     # filters初始化为空，如果keywords不为空，则将keywords append 到filters
     filters = []
@@ -131,7 +134,7 @@ def edit():
         if keywords != "":
             filters.append(News.title.contains(keywords))
 
-        pageinate = News.query.filter(*filters).paginate(page,10,False)
+        pageinate = News.query.filter(*filters).paginate(page, 10, False)
 
         total = pageinate.pages
         currentPage = pageinate.page
@@ -146,15 +149,16 @@ def edit():
         newsList.append(new.to_dict())
     # 封装前端所需数据
     data = {
-        "totalPage" : total,
-        "currentPage" : currentPage,
-        "newsList" : newsList
+        "totalPage": total,
+        "currentPage": currentPage,
+        "newsList": newsList
     }
 
-    return render_template('admin/news_edit.html',data=data)
+    return render_template('admin/news_edit.html', data=data)
+
 
 # 将edit_detail分为两种请求
-@admin_news.route('/edit_detail',methods=['GET','POST'])
+@admin_news.route('/edit_detail', methods=['GET', 'POST'])
 def edit_detail():
     from app.models import News
     from app.models import Category
@@ -163,17 +167,17 @@ def edit_detail():
     if request.method == 'GET':
         news_id = request.args.get("news_id")
         if not news_id:
-            return render_template("admin/news_edit_detail.html",data={"msg":"参数不全"})
+            return render_template("admin/news_edit_detail.html", data={"msg": "参数不全"})
         try:
             news = News.query.get(news_id)
         except Exception as e:
-            return render_template('admin/news_edit_detail.html',data={"msg":"新闻获取失败"})
+            return render_template('admin/news_edit_detail.html', data={"msg": "新闻获取失败"})
         if not news:
-            return render_template('admin/news_edit_detail.html',data={"msg":"新闻不存在"})
+            return render_template('admin/news_edit_detail.html', data={"msg": "新闻不存在"})
         try:
             categories = Category.query.filter(Category.id != 1).all()
         except Exception as e:
-            return render_template('admin/news_edit_detail.html',data={"msg":"分类查询失败"})
+            return render_template('admin/news_edit_detail.html', data={"msg": "分类查询失败"})
         category_list = []
         for category in categories:
             c = category.to_dict()
@@ -182,10 +186,10 @@ def edit_detail():
                 c["selected"] = True
             category_list.append(c)
         data = {
-            "news":news.to_dict(),
-            "category_list":category_list
+            "news": news.to_dict(),
+            "category_list": category_list
         }
-        return render_template('admin/news_edit_detail.html',data=data)
+        return render_template('admin/news_edit_detail.html', data=data)
 
     # 如果是POST请求
     else:
@@ -196,22 +200,20 @@ def edit_detail():
         index_image = request.files.get("index_image")
         category_id = request.form.get("category_id")
 
-        if not all([news_id,title,digest,content,category_id]):
-            return jsonify(errno=RET.PARAMERR,msg="参数不全")
+        if not all([news_id, title, digest, content, category_id]):
+            return jsonify(errno=RET.PARAMERR, msg="参数不全")
         try:
             news = News.query.get(news_id)
         except Exception as e:
-            return jsonify(errno=RET.NODATA,msg="新闻不存在")
+            return jsonify(errno=RET.NODATA, msg="新闻不存在")
         if index_image:
             try:
                 index_image_name = storage(index_image.read())
             except Exception as e:
-                return jsonify(errno=RET.THIRDERR,msg="网络异常")
+                return jsonify(errno=RET.THIRDERR, msg="网络异常")
             if not index_image_name:
-                return jsonify(errno=RET.NODATA,msg="上传图片失败")
+                return jsonify(errno=RET.NODATA, msg="上传图片失败")
             news.index_image_url = "http://pv875q204.bkt.clouddn.com/" + index_image_name
-
-
 
     news.title = title
     news.digest = digest
@@ -222,7 +224,8 @@ def edit_detail():
     except Exception as e:
         db.session.rollback()
     # 2.9: 返回响应
-    return jsonify(errno=RET.OK,msg="操作成功")
+    return jsonify(errno=RET.OK, msg="操作成功")
+
 
 # 返回新闻分类页面
 @admin_news.route('/type')
@@ -233,10 +236,11 @@ def type():
     category_list = []
     for category in categories:
         category_list.append(category.to_dict())
-    return render_template('admin/news_type.html',category_list=category_list)
+    return render_template('admin/news_type.html', category_list=category_list)
+
 
 # 修改/添加 新闻分类的操作
-@admin_news.route('/type_handle',methods=['POST'])
+@admin_news.route('/type_handle', methods=['POST'])
 def type_handle():
     from app.models import Category
     from app import db
@@ -246,11 +250,11 @@ def type_handle():
     print(category_id)
     # 参数校验
     if not name:
-        return  jsonify(errno=RET.PARAMERR,msg="参数不全")
+        return jsonify(errno=RET.PARAMERR, msg="参数不全")
     try:
         categories = Category.query.all()
     except Exception as e:
-        return jsonify(errno=RET.DBERR,msg="分类查询失败")
+        return jsonify(errno=RET.DBERR, msg="分类查询失败")
     category_name = []
     for category in categories:
         category_name.append(category.name)
@@ -259,7 +263,7 @@ def type_handle():
         try:
             category = Category.query.get(category_id)
         except Exception as e:
-            return jsonify(errno=RET.DBERR,msg="分类查询失败")
+            return jsonify(errno=RET.DBERR, msg="分类查询失败")
 
         if not category:
             return jsonify(errno=RET.NODATA, errmsg="分类不存在")
@@ -284,8 +288,6 @@ def type_handle():
     except Exception as e:
         # 回滚
         db.session.rollback()
-        return jsonify(errno=RET.DBERR,msg="数据保存失败")
+        return jsonify(errno=RET.DBERR, msg="数据保存失败")
 
-    return jsonify(errno=RET.OK,msg="操作成功")
-
-
+    return jsonify(errno=RET.OK, msg="操作成功")
