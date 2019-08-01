@@ -23,6 +23,7 @@ def news_detail(news_id):
     try:
         news = News.query.get(news_id)
         user_id = session.get("user_id")
+        user1 = User.query.get(news.user_id)
         if user_id:
             print(user_id)
             user = User.query.get(user_id)
@@ -247,9 +248,9 @@ def collect_news():
     from app import db
 
     user_id = session.get("user_id")
-    user = User.query.get(user_id)
-    if not user:
+    if user_id is None:
         return jsonify(errno=RET.SESSIONERR, errmsg="用户未登录")
+    user1 = User.query.get(user_id)
 
     # 1. 接受参数
     news_id = request.json.get("news_id")
@@ -280,11 +281,11 @@ def collect_news():
 
     # 收藏以及取消收藏
     if action == "remove_collect":
-        if news in user.collection_news:
-            user.collection_news.remove(news)
+        if news in user1.collection_news:
+            user1.collection_news.remove(news)
     else:
-        if news not in user.collection_news:
-            user.collection_news.append(news)
+        if news not in user1.collection_news:
+            user1.collection_news.append(news)
 
     try:
         db.session.commit()
@@ -303,8 +304,8 @@ def followed_user():
     from app import db
 
     user_id1 = session.get("user_id")
-    user = User.query.get(user_id1)
-    if not user:
+
+    if user_id1 is None:
         return jsonify(errno=RET.SESSIONERR, errmsg="用户未登录")
 
     # 1. 接受参数
@@ -320,13 +321,14 @@ def followed_user():
 
     try:
         user_id = int(user_id)
+        user1 = User.query.get(user_id)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
 
     # 判断新闻是否存在
     try:
-        otherUser = User.query.get(user_id)
+        otherUser = User.query.get(user_id1)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="数据查询错误")
@@ -334,13 +336,13 @@ def followed_user():
     if not otherUser:
         return jsonify(errno=RET.NODATA, errmsg="未查询到用户数据")
 
-    # 收藏以及取消收藏
+    # 关注以及取消关注
     if action == "unfollow":
-        if otherUser in user.followers:
-            user.followers.remove(otherUser)
+        if otherUser in user1.followers:
+            user1.followers.remove(otherUser)
     else:
-        if otherUser not in user.followers:
-            user.followers.append(otherUser)
+        if otherUser not in user1.followers:
+            user1.followers.append(otherUser)
 
     try:
         db.session.commit()
