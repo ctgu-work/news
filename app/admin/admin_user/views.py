@@ -5,12 +5,12 @@ from flask import render_template,request,session,json
 from app.constants import *
 from sqlalchemy import and_
 
-# @admin_user.before_request
-# def check():
-#     if 'user' in session:
-#         return render_template('admin/login.html')
-#     else:
-#         pass
+@admin_user.before_request
+def check():
+    if 'admin_name' not in session and request.url != "http://127.0.0.1:5000/admin/user/login":
+        return render_template('admin/login.html')
+    else:
+        pass
 
 @admin_user.route('/login' , methods = ['GET','POST'])
 def login():
@@ -23,6 +23,10 @@ def login():
         if user.check_password(password):
             session['admin_name'] = username
             return render_template('admin/index.html',user = user)
+    if request.method == "GET":
+        print("asdf")
+        if 'admin_name' in session:
+            session.pop('admin_name')
     return render_template('admin/login.html')
 
 @admin_user.route('/count')
