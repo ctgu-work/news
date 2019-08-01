@@ -20,6 +20,7 @@ from app import constants
 def news_detail(news_id):
     from app.models import User, Comment, News, CommentLike, Category
     # 查询文章内容
+    from app import db
     try:
         news = News.query.get(news_id)
         user_id = session.get("user_id")
@@ -102,6 +103,11 @@ def news_detail(news_id):
         'is_followed': is_followed
     }
 
+    try:
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        db.session.rollback()
     return render_template("news/detail.html", data=data)
 
 
