@@ -5,10 +5,12 @@ from app.utils.response_code import RET
 from app.utils.qiniu.image_storage import storage
 from app import constants
 
+
 # 测试
 @home_user.route('/test1')
 def test1():
     return "user"
+
 
 # /user
 # user的默认界面
@@ -142,8 +144,6 @@ def user_collection(page=None):
     return render_template('news/user_collection.html', page_data=page_data)
 
 
-
-
 def getUser():
     from app.models import User
     id = session["user_id"]
@@ -184,26 +184,40 @@ def attention(name):
     return jsonify({"msg": "true"})
 
 
-# 进入别人的界面
+# 进入ta人的界面
 @home_user.route('/atnuser/<name>,<int:page>')
 def atnuser(name, page):
     from app.models import User, News
-    user = getUser()
+    # ta人的信息
     idol = User.query.filter(User.nick_name == name).first()
-    list = idol.followers.filter(User.id == user.id).first()
+
+    list = None
+    if "user_id" in session:  # 登录后查看ta人信息
+        user = getUser()
+        # 查看我是否关注
+
+        list = idol.followers.filter(User.id == user.id).first()
+    else:  # 未登录查看ta人信息
+        user = None
+
     if list is not None:
         is_attention = 'True'  # 记录是否被关注
     else:
         is_attention = "False"
-
-    print(is_attention)
+    print("list", list, " is_attention: ", is_attention)
+    # ta人的文章
     page_data = idol.news_list.order_by(News.id.asc()).paginate(page=page, per_page=6)
     return render_template("news/other.html", user=user, idol=idol, page_data=page_data, is_attention=is_attention)
 
 
+# 拦截器
 @home_user.before_request
 def before_request():
-    if "user_id" in session:
+    import re
+    # 匹配查看用户路由
+    pattern = re.compile('/user/atnuser/(.*),[0-9]*')
+    # if request.path =='/atnuser/<name>,<int:page>'
+    if "user_id" in session or pattern.match(request.path):
         pass
     else:
         return redirect("/index")
@@ -211,7 +225,7 @@ def before_request():
 
 @home_user.route('/examine_news_list/<int:page>')
 def examine_news_list(page):
-    from app.models import User,News
+    from app.models import User, News
     # 1. 取参数
     examine_id = session["user_id"]
 
@@ -232,7 +246,9 @@ def examine_news_list(page):
         return jsonify(errno=RET.NODATA, errmsg="当前用户不存在")
 
     try:
-        paginate = examine.news_list.order_by(News.create_time.desc()).paginate(page, constants.USER_COLLECTION_MAX_NEWS, False)
+        paginate = examine.news_list.order_by(News.create_time.desc()).paginate(page,
+                                                                                constants.USER_COLLECTION_MAX_NEWS,
+                                                                                False)
         news_li = paginate.items
         current_page = paginate.page
         total_page = paginate.pages
@@ -244,13 +260,8 @@ def examine_news_list(page):
     for news_li_item in news_li:
         news_dict_li.append(news_li_item.to_review_dict())
 
-
-    # data = {
-    #     "news_list": news_dict_li,
-    #     "total_page": total_page,
-    #     "current_page": current_page
-    # }
-    return render_template('news/user_news_list.html', news_list=news_dict_li, total_page = total_page, current_page  = current_page)
+    return render_template('news/user_news_list.html', news_list=news_dict_li, total_page=total_page,
+                           current_page=current_page)
 
 
 @home_user.route('/news_release', methods=["GET", "POST"])
@@ -281,7 +292,7 @@ def user_news_release():
     # 取参数
     user_id = session["user_id"]
     # 1. 取到请求参数
-    source = "个人发布" # 来源
+    source = "个人发布"  # 来源
     title = request.form.get("title")
     category_id = request.form.get("category_id")
     digest = request.form.get("digest")
@@ -332,7 +343,7 @@ def user_news_release():
 
 @home_user.route('/news_release1/<int:new_id>', methods=["GET", "POST"])
 def user_news_release1(new_id):
-    from app.models import User,Category, News
+    from app.models import User, Category, News
 
     from app.utils.qiniu.image_storage import storage
 
@@ -365,7 +376,7 @@ def user_news_release2():
     news = News.query.get(new_id)
     user_id = session["user_id"]
     # 1. 取到请求参数
-    source = "个人发布" # 来源
+    source = "个人发布"  # 来源
     title = request.form.get("title")
     category_id = request.form.get("category_id")
     digest = request.form.get("digest")

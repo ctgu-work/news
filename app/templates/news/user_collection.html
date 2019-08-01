@@ -15,7 +15,7 @@
     <ul class="article_list">
 
         {% for v in page_data.items %}
-            <li><a href="#">{{ v.title }}</a><span>{{ v.update_time }}</span></li>
+            <li><a href="/news/{{ v.id }}" target="_blank">{{ v.title }}</a><span>{{ v.update_time }}</span></li>
         {% endfor %}
     </ul>
 
