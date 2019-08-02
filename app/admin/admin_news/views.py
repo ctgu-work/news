@@ -1,11 +1,17 @@
 from . import admin_news
-from flask import render_template
+from flask import render_template,session,redirect
 from flask import request
 from flask import jsonify
 from app.utils.response_code import RET
 from app.utils.qiniu.image_storage import storage
 from app import constants
 
+@admin_news.before_request
+def check():
+    if 'admin_name' not in session and "admin/user/login" not in request.url:
+        return redirect("/admin/user/login")
+    else:
+        pass
 
 @admin_news.route('/index')
 def index():
