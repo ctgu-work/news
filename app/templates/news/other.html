@@ -35,7 +35,7 @@
                 <h3>ta 的文章</h3>
                 <ul class="article_list">
                     {% for v in page_data.items %}
-                        <li><a href="#">{{ v.title }}</a><span>{{ v.update_time }}</span></li>
+                        <li><a href="/news/{{ v.id }}">{{ v.title }}</a><span>{{ v.update_time }}</span></li>
                     {% endfor %}
                 </ul>
                 {% if page_data.items | length != 0 %}
