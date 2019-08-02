@@ -1,9 +1,8 @@
 # coding:utf8
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-
+from redis import StrictRedis
 from config import config
-
 
 from app.home.home_user import home_user
 from app.home.home_news import home_news
@@ -16,10 +15,14 @@ from app.home.home_news import *
 from app.home.home_user import *
 
 
-def create_app():
+def create_app(config_name):
     app = Flask(__name__)
     # 加载配置文件
     app.config.from_object(config["development"])
+
+    # 初始化redis
+    # redis = StrictRedis(host=config[config_name].REDIS_HOST, port=config[config_name].REDIS_PORT,
+    #                     password=config[config_name].REDIS_POSSWORD)
 
     # 注册蓝图
     app.register_blueprint(home_news, url_prefix="/news")
@@ -33,6 +36,5 @@ def create_app():
     return app
 
 
-app = create_app()
+app = create_app("development")
 db = SQLAlchemy(app)
-

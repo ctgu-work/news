@@ -6,12 +6,6 @@ from app.utils.qiniu.image_storage import storage
 from app import constants
 
 
-# 测试
-@home_user.route('/test1')
-def test1():
-    return "user"
-
-
 # /user
 # user的默认界面
 @home_user.route('/')
