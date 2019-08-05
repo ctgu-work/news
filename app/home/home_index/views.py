@@ -77,10 +77,10 @@ def getImageCode():
     img_name, img_content, img_data = captcha.generate_captcha()
     response = make_response(img_data)
     response.content_type = "image/jpeg"
-    #将验证码存入redis
-    set_redis_data()
+    # 将验证码存入redis
+    # set_redis_data()
     # 将验证码存入session
-    # session[img_code_id] = img_content
+    session[img_code_id] = img_content
     # 返回验证码图片
     return response
 
@@ -100,22 +100,36 @@ def getSmsCode():
         # 返回参数错误
         return jsonify(errno=RET.PARAMERR, errmsg=error_map[RET.PARAMERR])
     real_img_code = session.get(img_code_id)
-    print(real_img_code, img_code)
+    print('发送短信验证码： ', real_img_code, img_code)
     if real_img_code != img_code.upper():
         return jsonify(errno=RET.PARAMERR, errmsg=error_map[RET.PARAMERR])
     user = User.query.filter_by(mobile=mobile).first()
     if user:
         return jsonify(errno=RET.DATAEXIST, errmsg=error_map[RET.DATAEXIST])
     # 先从redis中获取
-    sms_code = get_redis_data(mobile)
-    print("先获取", sms_code)
+    sms_code = None
+    try:
+        sms_code = get_redis_data(mobile)
+        print("先获取", sms_code)
+    except Exception as e:
+        print(e)
+
     if sms_code is None:  # 改手机号未设置验证码
         sms_code = random.randint(100000, 999999)  # 生成验证码
         response_code = CCP().send_template_sms(mobile, [sms_code], 1)  # 发送验证码
         # 存入redis
         set_redis_data(mobile, sms_code, SMS_CODE_REDIS_EXPIRES)  # 把验证码存在redis里
     else:
-        print("验证码已经设置: ", sms_code)
+        time = None
+        try:
+            time = get_redis_time(mobile)
+        except Exception as e:
+            print(e)
+        if time == None:  # 为空
+            return jsonify(errno=RET.UNKOWNERR, errmsg=error_map[RET.UNKOWNERR])
+        elif time == -2:
+            return jsonify(errno=RET.UNKOWNERR, errmsg="验证码过期")
+        return jsonify(errno=RET.DATAEXIST, errmsg=("请在" + str(time) + "秒后重新发送"))
     print("response_code: ", response_code)
     print("sms_code: ", sms_code)
     print("获取设置的key: ", get_redis_data(mobile))
@@ -138,7 +152,7 @@ def userRegister():
     # 从redis中获取
     # real_sms_code = session.get(mobile)
     real_sms_code = get_redis_data(mobile)
-    print(real_sms_code, sms_code)
+    print('验证短信验证码: ', real_sms_code, sms_code)
     if str(real_sms_code) != str(sms_code):
         return jsonify(errno=RET.PARAMERR, errmsg="短信验证码错误")
     user = User()
@@ -199,5 +213,20 @@ def set_redis_data(key, value, time):
 def get_redis_data(key):
     from app.utils.redis.redis import connect_redis
     conn = connect_redis()
-    time = conn.get(key)
+    v = conn.get(key)
+    print("get: ", v)
+    if v != None:
+        value = v.decode()
+    return value
+
+
+# 获取key对应的事件
+def get_redis_time(key):
+    from app.utils.redis.redis import connect_redis
+    conn = connect_redis()
+    time = None
+    try:
+        time = conn.ttl(key)
+    except Exception as e:
+        print(e)
     return time
