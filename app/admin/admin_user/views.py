@@ -59,8 +59,6 @@ def count():
     times = []
     nums = []
     # 获取最近12天的日期，并转化为str格式存到数组中
-    while(i <= 12):
-        t = now + datetime.timedelta(days=-i+1)
     while (i <= 12):
         t = now + datetime.timedelta(days=-i + 1)
         times.append(str(t.strftime('%Y-%m-%d')))
