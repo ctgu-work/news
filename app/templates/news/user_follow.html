@@ -21,7 +21,8 @@
     {#    {{user_list|length}}#}
     {% for v in range(0,user_list|length) %}
         <li class="author_card card_list">
-            <a href="#" target="_blank" class="author_pic">
+            <a href="{{ url_for('/user.atnuser',name=user_list[v].nick_name,page=1) }}" target="_blank"
+               class="author_pic">
                 <img
                         {% if user_list[v].avatar_url %}
                             src="{{ user_list[v].avatar_url }}"
