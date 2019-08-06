@@ -20,7 +20,6 @@ class DevelopmentConfig(BaseConfig):
     """开发环境"""
     pass
 
-
 class ProductionConfig(BaseConfig):
     """生产环境"""
     DEBUG = False

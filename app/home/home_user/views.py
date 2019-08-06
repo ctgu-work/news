@@ -12,7 +12,11 @@ from app import constants
 def index():
     from app.models import User
     id = session["user_id"]
-    user = User.query.filter_by(id=id).first()
+    try:
+        user = User.query.filter_by(id=id).first()
+    except Exception as e:
+        current_app.logger.exception('%s', e)
+        return render_template("news/user.html", user=None)
     return render_template("news/user.html", user=user)
 
 
@@ -50,20 +54,19 @@ def user_base():
 @home_user.route('/user_pic_info/', methods=["POST", "GET"])
 def user_pic_info():
     form = UserImg()
-    print("img")
     if request.method == "POST":
-        print("POST")
         if form.validate_on_submit():
-            file = request.files.get('url').read()
-            key = storage(file)
-            print(key)
-            print(type(key))
-            user = getUser()
-            url_str = "http://pv875q204.bkt.clouddn.com/" + key
-            user.avatar_url = url_str
-            from app import db
-            db.session.commit()
-            # flash("修改失败！ ", "error")
+            try:
+                file = request.files.get('url').read()
+                key = storage(file)
+                user = getUser()
+                url_str = "http://pv875q204.bkt.clouddn.com/" + key
+                user.avatar_url = url_str
+                from app import db
+                db.session.commit()
+                flash("修改失败！ ", "error")
+            except Exception as e:
+                current_app.logger.exception('%s', "头像上传失败")
     return render_template('news/user_pic_info.html', form=form, user=getUser())
 
 
@@ -149,14 +152,10 @@ def getUser():
 @home_user.route('/unattention/<name>', methods=["GET", "POST"])
 def unattention(name):
     from app.models import User
-    print("取关...")
     # 取关的人
     usr = getUser()
     # 被取关的人
     user = User.query.filter(User.nick_name == name).first()
-    # print(user.followers)
-    print(usr)
-    print(user)
     user.followers.remove(usr)
     from app import db
     db.session.commit()
@@ -167,7 +166,6 @@ def unattention(name):
 @home_user.route('/attention/<name>', methods=["POST", "GET"])
 def attention(name):
     from app.models import User
-    print("关注")
     # 关注的人
     usr = getUser()
     # 被关注的人
@@ -198,7 +196,6 @@ def atnuser(name, page):
         is_attention = 'True'  # 记录是否被关注
     else:
         is_attention = "False"
-    print("list", list, " is_attention: ", is_attention)
     # ta人的文章
     page_data = idol.news_list.order_by(News.id.asc()).paginate(page=page, per_page=6)
     return render_template("news/other.html", user=user, idol=idol, page_data=page_data, is_attention=is_attention)
@@ -210,7 +207,6 @@ def before_request():
     import re
     # 匹配查看用户路由
     pattern = re.compile('/user/atnuser/(.*),[0-9]*')
-    # if request.path =='/atnuser/<name>,<int:page>'
     if "user_id" in session or pattern.match(request.path):
         pass
     else:
