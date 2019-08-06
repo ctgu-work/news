@@ -1,5 +1,5 @@
 # coding:utf8
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from redis import StrictRedis
 from config import config
@@ -38,3 +38,15 @@ def create_app(config_name):
 
 app = create_app("development")
 db = SQLAlchemy(app)
+
+
+# 配置404界面
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("/news/404.html"), 404
+
+
+# 配置500界面
+@app.errorhandler(500)
+def page_not_found(e):
+    return render_template("/news/500.html"), 500

@@ -14,11 +14,6 @@ class BaseConfig:
         'password': 'chase',
         'db': 0
     }
-    # REDIS_HOST = "127.0.0.1"
-
-
-# REDIS_PORT = "6379"
-# REDIS_POSSWORD = "chase"
 
 
 class DevelopmentConfig(BaseConfig):

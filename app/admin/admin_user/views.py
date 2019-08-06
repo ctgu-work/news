@@ -1,7 +1,7 @@
 # coding=utf-8
 import datetime
 from . import admin_user
-from flask import render_template,request,session,json,url_for,redirect,jsonify
+from flask import render_template, request, session, json, url_for, redirect, jsonify
 from app.constants import *
 from sqlalchemy import and_
 from app.utils.response_code import RET
@@ -15,9 +15,9 @@ def check():
     else:
         pass
 
-# 登录
-@admin_user.route('/login' , methods = ['GET','POST'])
 
+# 登录
+@admin_user.route('/login', methods=['GET', 'POST'])
 def login():
     from app.models import User
     import app.models
@@ -25,10 +25,10 @@ def login():
     if request.method == "POST":
         username = request.form.get('username')
         password = request.form.get('password')
-        user = User.query.filter(and_(User.is_admin==1 , User.nick_name == username)).first()
+        user = User.query.filter(and_(User.is_admin == 1, User.nick_name == username)).first()
         if user != None and user.check_password(password):
             session['admin_name'] = username
-            return render_template('admin/index.html',user = user)
+            return render_template('admin/index.html', user=user)
         else:
             msg = "用户名或密码错误"
             return render_template('admin/login.html', user=user, msg=msg)
@@ -37,6 +37,7 @@ def login():
         if 'admin_name' in session:
             session.pop('admin_name')
     return render_template('admin/login.html')
+
 
 # 获取用户统计界面
 @admin_user.route('/count')
@@ -59,8 +60,8 @@ def count():
     times = []
     nums = []
     # 获取最近12天的日期，并转化为str格式存到数组中
-    while(i <= 12):
-        t = now + datetime.timedelta(days=-i+1)
+    while (i <= 12):
+        t = now + datetime.timedelta(days=-i + 1)
     while (i <= 12):
         t = now + datetime.timedelta(days=-i + 1)
         times.append(str(t.strftime('%Y-%m-%d')))
