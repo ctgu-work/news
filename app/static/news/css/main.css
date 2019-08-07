@@ -1020,6 +1020,24 @@ body{
     position: relative;
 }
 
+
+.base_info,.pic_info,.type_info,.pass_info,.my_collect,.release_form1,.news_list{
+    width:700px;
+    margin:0px auto;
+}
+
+
+.common_title,.base_info h3,.pic_info h3,.type_info h3,.pass_info h3,.my_collect h3,.release_form1 h3,.news_list h3{
+    font-size: 18px;
+    padding: 10px 20px;
+    color: #9698a5;
+    border-bottom:1px solid #ededed;
+}
+
+
+.pass_info,.release_form1{
+    position: relative;
+}
 .error_tip{
     position:absolute;
     left:178px;
@@ -1248,6 +1266,12 @@ body{
 }
 
 .release_form .form-group{
+    width:700px;
+    overflow:hidden;
+    margin:15px auto;
+}
+
+.release_form1 .form-group{
     width:700px;
     overflow:hidden;
     margin:15px auto;

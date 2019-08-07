@@ -8,14 +8,17 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # redis配置
-    REDIS_HOST = "127.0.0.1"
-    REDIS_PORT = "6379"
+    REDIS_DB_URL = {
+        'host': '127.0.0.1',
+        'port': 6379,
+        'password': 'chase',
+        'db': 0
+    }
 
 
 class DevelopmentConfig(BaseConfig):
     """开发环境"""
     pass
-
 
 class ProductionConfig(BaseConfig):
     """生产环境"""

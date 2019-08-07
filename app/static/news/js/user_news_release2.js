@@ -6,7 +6,7 @@ function getCookie(name) {
 
 $(function () {
 
-    $(".release_form").submit(function (e) {
+    $(".release_form1").submit(function (e) {
         e.preventDefault()
         // 发布新闻
         $(this).ajaxSubmit({
@@ -19,7 +19,7 @@ $(function () {
                         item["value"] = tinyMCE.activeEditor.getContent()
                     }
                 }},
-            url: "/user/news_release",
+            url: "/user/news_release2",
             type: "POST",
             headers: {
                 "X-CSRFToken": getCookie('csrf_token')
@@ -41,8 +41,7 @@ $(function () {
         // // 滚动到顶部
         // window.parent.scrollTo(0, 0)
     })
-
-})
         // // 选中索引为6的左边单菜单
         // window.parent.fnChangeMenu(6)
         // // 滚动到顶部
+})
