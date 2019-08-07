@@ -1,5 +1,5 @@
 from . import home_index
-from flask import render_template, session, request, make_response, jsonify
+from flask import render_template, session, request, make_response, jsonify, current_app
 from app.constants import CLICK_RANK_MAX_NEWS, HOME_PAGE_MAX_NEWS, SMS_CODE_REDIS_EXPIRES
 from app.utils.response_code import RET, error_map
 from app.utils.captcha.captcha import captcha
@@ -124,10 +124,11 @@ def getSmsCode():
         try:
             time = get_redis_time(mobile)
         except Exception as e:
-            print(e)
+            current_app.logger.exception('%s', e)
         if time == None:  # 为空
             return jsonify(errno=RET.UNKOWNERR, errmsg=error_map[RET.UNKOWNERR])
         elif time == -2:
+            current_app.logger.exception('%s', user, "验证码过期")
             return jsonify(errno=RET.UNKOWNERR, errmsg="验证码过期")
         return jsonify(errno=RET.DATAEXIST, errmsg=("请在" + str(time) + "秒后重新发送"))
     print("response_code: ", response_code)
@@ -152,7 +153,6 @@ def userRegister():
     # 从redis中获取
     # real_sms_code = session.get(mobile)
     real_sms_code = get_redis_data(mobile)
-    print('验证短信验证码: ', real_sms_code, sms_code)
     if str(real_sms_code) != str(sms_code):
         return jsonify(errno=RET.PARAMERR, errmsg="短信验证码错误")
     user = User()
@@ -184,6 +184,7 @@ def userLogin():
         return jsonify(errno=RET.PARAMERR, errmsg="用户名或者密码错误")
     user.last_login = datetime.now()
     session["user_id"] = user.id
+    current_app.logger.info('%s', user)
     return jsonify(errno=RET.OK, errmsg=error_map[RET.OK])
 
 
@@ -201,7 +202,6 @@ def set_redis_data(key, value, time):
     from app.utils.redis.redis import connect_redis
     conn = connect_redis()
     data = value
-    print("存入: ", key, " ", data)
     conn.set(
         name=key,
         value=data,
@@ -214,7 +214,6 @@ def get_redis_data(key):
     from app.utils.redis.redis import connect_redis
     conn = connect_redis()
     v = conn.get(key)
-    print("get: ", v)
     if v != None:
         value = v.decode()
     return value

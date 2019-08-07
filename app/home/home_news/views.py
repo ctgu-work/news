@@ -5,16 +5,6 @@ from app.utils.response_code import RET
 from app import constants
 
 
-# def User_login_req(f):
-#     @wraps(f)
-#     def decorated_function(*args, **kwargs):
-#         if "home_user" not in session:
-#             return redirect(url_for("home_user.login", next=request.url))
-#         return f(*args, **kwargs)  # 调用完以后给函数继承
-#
-#     return decorated_function
-
-
 # 新闻，用户，排行详情展示
 @home_news.route('/<int:news_id>')
 def news_detail(news_id):
@@ -230,7 +220,7 @@ def thumbs_up():
                                                       CommentLike.comment_id == comment.id).first()
 
         if comment_like_model:
-        # 从session中清除数据
+            # 从session中清除数据
             db.session.delete(comment_like_model)
 
             comment.like_count -= 1
@@ -281,10 +271,8 @@ def collect_news():
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="数据查询错误")
-
     if not news:
         return jsonify(errno=RET.NODATA, errmsg="未查询到新闻数据")
-
     # 收藏以及取消收藏
     if action == "remove_collect":
         if news in user1.collection_news:
@@ -292,7 +280,6 @@ def collect_news():
     else:
         if news not in user1.collection_news:
             user1.collection_news.append(news)
-
     try:
         db.session.commit()
     except Exception as e:
@@ -331,7 +318,6 @@ def followed_user():
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
-
     # 判断新闻是否存在
     try:
         otherUser = User.query.get(user_id1)
@@ -341,7 +327,6 @@ def followed_user():
 
     if not otherUser:
         return jsonify(errno=RET.NODATA, errmsg="未查询到用户数据")
-
     # 关注以及取消关注
     if action == "unfollow":
         if otherUser in user1.followers:
@@ -349,12 +334,10 @@ def followed_user():
     else:
         if otherUser not in user1.followers:
             user1.followers.append(otherUser)
-
     try:
         db.session.commit()
     except Exception as e:
         current_app.logger.error(e)
         db.session.rollback()
         return jsonify(errno=RET.DBERR, errmsg="保存失败")
-
     return jsonify(errno=RET.OK, errmsg="操作成功")

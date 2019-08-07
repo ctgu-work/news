@@ -60,7 +60,7 @@ class UserBaseForm(FlaskForm):
     submit = SubmitField(
         '确认',
         render_kw={
-            "class": "btn btn-primary btn-block btn-flat"
+            "class": "btn btn-primary center-block"
         }
 
     )
@@ -104,7 +104,7 @@ class ModifyPassowrd(FlaskForm):
     submit = SubmitField(
         '提交',
         render_kw={
-            "class": "btn btn-primary btn-block btn-flat"
+            "class": "btn btn-primary  center-block"
         }
     )
 
@@ -121,7 +121,7 @@ class UserImg(FlaskForm):
     submit = SubmitField(
         '提交',
         render_kw={
-            "class": "btn btn-primary btn-block btn-flat"
+            "class": "btn btn-primary  center-block"
         }
 
     )

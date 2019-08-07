@@ -1,1 +1,3 @@
 2019-08-06 15:33:46,489 - INFO - views.py - index - 18 - message info is <User 1011>
+2019-08-07 08:53:23,725 - INFO - views.py - index - 17 - <User 1005>
+2019-08-07 08:54:35,363 - INFO - views.py - userLogin - 187 - <User 1005>

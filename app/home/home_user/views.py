@@ -39,12 +39,12 @@ def user_base():
             data = form.data
             user.signature = data["signature"]
             user.nick_name = data["nick_name"]
-            print(data["gender"])
             user.gender = data["gender"]
-            print(data["signature"])
-            print(user.signature)
             from app import db
-            db.session.commit()
+            try:
+                db.session.commit()
+            except Exception as e:
+                current_app.logger.exception('%s', "数据库commit异常")
             flash("修改成功！ ", "ok")
 
     return render_template("news/user_base_info.html", form=form, user=user)
@@ -82,7 +82,6 @@ def user_follow(page=None):
     # page_data = user.followers.order_by(User.id.asc()).paginate(page=page, per_page=4)
     # 获取所有关注
     page_data = user.followed.order_by(User.id.asc()).paginate(page=page, per_page=4)
-
     # 关注列表
     user_list = []
     # 关注用户的发布新闻数量
@@ -109,10 +108,7 @@ def user_pass_info():
     from app.models import User
     if request.method == "GET":
         form = ModifyPassowrd()
-        print("GET")
     else:
-
-        print("POST")
         form = ModifyPassowrd(formdata=request.form)
         if form.validate_on_submit():
             user = getUser()
@@ -124,8 +120,6 @@ def user_pass_info():
                 flash("提交成功", "ok")
             else:
                 flash("密码错误", "error")
-
-        print(form.errors)
     return render_template('news/user_pass_info.html', form=form)
 
 
@@ -144,7 +138,11 @@ def user_collection(page=None):
 def getUser():
     from app.models import User
     id = session["user_id"]
-    user = User.query.filter_by(id=id).first()
+    user = None
+    try:
+        user = User.query.filter_by(id=id).first()
+    except Exception as e:
+        current_app.logger.exception('%s', e)
     return user
 
 
