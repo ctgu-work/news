@@ -26,7 +26,7 @@ def review():
         if keywords != "":
             filters.append(News.title.contains(keywords))
 
-        pageinate = News.query.filter(*filters).paginate(page,10,False)
+        pageinate = News.query.order_by( News.create_time.desc() ).filter(*filters).paginate(page,10,False)
 
         total = pageinate.pages
         currentPage = pageinate.page
